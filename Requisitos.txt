@@ -1,10 +1,22 @@
 Projeto busca ativa
 
 - Requisitos funcionais:
- 	- O usuário importa alunos e suas respectivas situações quanto presença nas aulas.
-	- Enviar mensagens para alunos com situações irregulares de presença em diferente cenários de inadimplência.
-	- Criar cenários de irregularidade com dias e quantidades de faltas diferentes.
+
+ 	- O usuário importa alunos e suas respectivas situações quanto presença nas aulas;
+	- Enviar mensagens para alunos com situações irregulares de presença em diferente cenários de inadimplência;
+	- Criar cenários de irregularidade com dias e quantidades de faltas diferentes;
 	- Gerar relatórios com as estatísticas das mensagens enviadas.
 
 - Requisitos não funcionais:
 
+	- Segurança e controle de acesso aos dados dos alunos; 
+	- Proteção e privacidade dos dados pessoais; 
+	- Interface simples e intuitiva; 
+	- Bom desempenho no processamento de grandes quantidades de alunos; 
+	- Confiabilidade e integridade dos dados; 
+	- Disponibilidade do sistema; 
+	- Compatibilidade com navegadores utilizados pela instituição; 
+	- Facilidade de manutenção e atualização; 
+	- Capacidade de expansão conforme o aumento da quantidade de alunos; 
+	- Registro e rastreabilidade das mensagens enviadas; 
+	- Realização de backup e recuperação dos dados.
