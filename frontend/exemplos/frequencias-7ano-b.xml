@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<frequencias>
+  <aluno><nome>Natália Gomes</nome><turma>7º Ano B</turma><faltas>0</faltas><periodoEmDias>30</periodoEmDias><contato>(61) 90000-0013</contato></aluno>
+  <aluno><nome>Otávio Barbosa</nome><turma>7º Ano B</turma><faltas>2</faltas><periodoEmDias>30</periodoEmDias><contato>(61) 90000-0014</contato></aluno>
+  <aluno><nome>Paula Cardoso</nome><turma>7º Ano B</turma><faltas>15</faltas><periodoEmDias>30</periodoEmDias><contato>(61) 90000-0015</contato></aluno>
+  <aluno><nome>Rafael Araújo</nome><turma>7º Ano B</turma><faltas>4</faltas><periodoEmDias>30</periodoEmDias><contato>(61) 90000-0016</contato></aluno>
+  <aluno><nome>Sofia Carvalho</nome><turma>7º Ano B</turma><faltas>9</faltas><periodoEmDias>60</periodoEmDias><contato>(61) 90000-0017</contato></aluno>
+  <aluno><nome>Thiago Moreira</nome><turma>7º Ano B</turma><faltas>22</faltas><periodoEmDias>30</periodoEmDias><contato>(61) 90000-0018</contato></aluno>
+  <aluno><nome>Valentina Dias</nome><turma>7º Ano B</turma><faltas>1</faltas><periodoEmDias>15</periodoEmDias><contato>(61) 90000-0019</contato></aluno>
+  <aluno><nome>Lucas Nogueira</nome><turma>7º Ano B</turma><faltas>7</faltas><periodoEmDias>60</periodoEmDias><contato>(61) 90000-0020</contato></aluno>
+  <aluno><nome>Beatriz Teixeira</nome><turma>7º Ano B</turma><faltas>12</faltas><periodoEmDias>60</periodoEmDias><contato>(61) 90000-0021</contato></aluno>
+  <aluno><nome>Gustavo Pinto</nome><turma>7º Ano B</turma><faltas>3</faltas><periodoEmDias>15</periodoEmDias><contato>(61) 90000-0022</contato></aluno>
+  <aluno><nome>Manuela Correia</nome><turma>7º Ano B</turma><faltas>18</faltas><periodoEmDias>60</periodoEmDias><contato>(61) 90000-0023</contato></aluno>
+  <aluno><nome>Vinícius Cunha</nome><turma>7º Ano B</turma><faltas>5</faltas><periodoEmDias>30</periodoEmDias><contato>(61) 90000-0024</contato></aluno>
+</frequencias>

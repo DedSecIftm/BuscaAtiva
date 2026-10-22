@@ -1,0 +1,88 @@
+{
+  "alunos": [
+    {
+      "nome": "Yasmin Freitas",
+      "turma": "8º Ano C",
+      "faltas": 0,
+      "periodoEmDias": 30,
+      "contato": "(61) 90000-0025"
+    },
+    {
+      "nome": "Arthur Monteiro",
+      "turma": "8º Ano C",
+      "faltas": 2,
+      "periodoEmDias": 30,
+      "contato": "(61) 90000-0026"
+    },
+    {
+      "nome": "Lívia Ramos",
+      "turma": "8º Ano C",
+      "faltas": 15,
+      "periodoEmDias": 30,
+      "contato": "(61) 90000-0027"
+    },
+    {
+      "nome": "Enzo Batista",
+      "turma": "8º Ano C",
+      "faltas": 4,
+      "periodoEmDias": 30,
+      "contato": "(61) 90000-0028"
+    },
+    {
+      "nome": "Helena Vieira",
+      "turma": "8º Ano C",
+      "faltas": 9,
+      "periodoEmDias": 60,
+      "contato": "(61) 90000-0029"
+    },
+    {
+      "nome": "Samuel Duarte",
+      "turma": "8º Ano C",
+      "faltas": 22,
+      "periodoEmDias": 30,
+      "contato": "(61) 90000-0030"
+    },
+    {
+      "nome": "Alice Fernandes",
+      "turma": "8º Ano C",
+      "faltas": 1,
+      "periodoEmDias": 15,
+      "contato": "(61) 90000-0031"
+    },
+    {
+      "nome": "Davi Machado",
+      "turma": "8º Ano C",
+      "faltas": 7,
+      "periodoEmDias": 60,
+      "contato": "(61) 90000-0032"
+    },
+    {
+      "nome": "Laura Castro",
+      "turma": "8º Ano C",
+      "faltas": 12,
+      "periodoEmDias": 60,
+      "contato": "(61) 90000-0033"
+    },
+    {
+      "nome": "Miguel Azevedo",
+      "turma": "8º Ano C",
+      "faltas": 3,
+      "periodoEmDias": 15,
+      "contato": "(61) 90000-0034"
+    },
+    {
+      "nome": "Júlia Moraes",
+      "turma": "8º Ano C",
+      "faltas": 18,
+      "periodoEmDias": 60,
+      "contato": "(61) 90000-0035"
+    },
+    {
+      "nome": "Pedro Lopes",
+      "turma": "8º Ano C",
+      "faltas": 5,
+      "periodoEmDias": 30,
+      "contato": "(61) 90000-0036"
+    }
+  ]
+}
