@@ -1,0 +1,44 @@
+name: buscaativa
+
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-buscaativa}
+      POSTGRES_USER: ${POSTGRES_USER:-buscaativa}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-buscaativa}
+    volumes:
+      - dados-postgres:/var/lib/postgresql
+    # Exposto só na máquina local, para rodar o backend pela IDE durante o desenvolvimento.
+    ports:
+      - "127.0.0.1:${POSTGRES_PORTA:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend/buscaativa
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-buscaativa}
+      DB_USERNAME: ${POSTGRES_USER:-buscaativa}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-buscaativa}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  dados-postgres:

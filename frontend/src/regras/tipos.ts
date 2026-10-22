@@ -5,23 +5,30 @@ export interface Regra {
   nome: string
   tipo: TipoRegra
   quantidadeFaltas: number
-  // Usado apenas quando o tipo é 'noPeriodo'.
-  periodoEmDias: number
+  // Usado apenas quando o tipo é 'noPeriodo'; nas demais regras vem null da API.
+  periodoEmDias: number | null
   ativa: boolean
+  criadoEm: string
 }
 
-export type DadosRegra = Omit<Regra, 'id' | 'ativa'>
+// Dados editados no formulário.
+export interface DadosRegra {
+  nome: string
+  tipo: TipoRegra
+  quantidadeFaltas: number
+  periodoEmDias: number
+}
 
 function plural(quantidade: number, singular: string, varias: string): string {
   return `${quantidade} ${quantidade === 1 ? singular : varias}`
 }
 
-export function descreverRegra(regra: DadosRegra): string {
+export function descreverRegra(regra: Pick<Regra, 'tipo' | 'quantidadeFaltas' | 'periodoEmDias'>): string {
   const faltas = plural(regra.quantidadeFaltas, 'falta', 'faltas')
   if (regra.tipo === 'seguidas') {
     return `O aluno tiver ${faltas} ${regra.quantidadeFaltas === 1 ? 'seguida' : 'seguidas'}.`
   }
-  return `O aluno tiver ${faltas}, seguidas ou não, dentro de ${plural(regra.periodoEmDias, 'dia', 'dias')}.`
+  return `O aluno tiver ${faltas}, seguidas ou não, dentro de ${plural(regra.periodoEmDias ?? 0, 'dia', 'dias')}.`
 }
 
 // Retorna a mensagem de erro de cada campo inválido.

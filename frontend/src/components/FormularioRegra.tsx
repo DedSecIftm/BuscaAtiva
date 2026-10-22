@@ -15,6 +15,8 @@ import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { useTheme } from '@mui/material/styles'
+import { ErroApi } from '../regras/api.ts'
+import type { ErrosDosCampos } from '../regras/api.ts'
 import { descreverRegra, validarRegra } from '../regras/tipos.ts'
 import type { DadosRegra, TipoRegra } from '../regras/tipos.ts'
 
@@ -22,7 +24,7 @@ const REGRA_VAZIA: DadosRegra = { nome: '', tipo: 'seguidas', quantidadeFaltas: 
 
 interface Props {
   inicial?: DadosRegra
-  onSalvar: (dados: DadosRegra) => void
+  onSalvar: (dados: DadosRegra) => Promise<void>
   onCancelar: () => void
 }
 
@@ -30,23 +32,39 @@ function FormularioRegra({ inicial, onSalvar, onCancelar }: Props) {
   const telaPequena = useMediaQuery(useTheme().breakpoints.down('sm'))
   const [dados, setDados] = useState<DadosRegra>(inicial ?? REGRA_VAZIA)
   const [tentouSalvar, setTentouSalvar] = useState(false)
+  const [salvando, setSalvando] = useState(false)
+  const [errosDoServidor, setErrosDoServidor] = useState<ErrosDosCampos>({})
+  const [erroGeral, setErroGeral] = useState<string | null>(null)
   const erros = validarRegra(dados)
   const valida = Object.keys(erros).length === 0
 
   function alterar<Campo extends keyof DadosRegra>(campo: Campo, valor: DadosRegra[Campo]) {
     setDados((atuais) => ({ ...atuais, [campo]: valor }))
+    setErrosDoServidor((atuais) => ({ ...atuais, [campo]: undefined }))
   }
 
-  function aoEnviar(evento: FormEvent) {
+  async function aoEnviar(evento: FormEvent) {
     evento.preventDefault()
     setTentouSalvar(true)
-    if (valida) onSalvar({ ...dados, nome: dados.nome.trim() })
+    if (!valida || salvando) return
+
+    setSalvando(true)
+    setErroGeral(null)
+    try {
+      await onSalvar({ ...dados, nome: dados.nome.trim() })
+    } catch (erro) {
+      const erroApi = erro instanceof ErroApi ? erro : new ErroApi('Não foi possível salvar a regra.')
+      setErrosDoServidor(erroApi.erros)
+      if (Object.keys(erroApi.erros).length === 0) setErroGeral(erroApi.message)
+      setSalvando(false)
+    }
   }
 
-  const erroVisivel = (campo: keyof DadosRegra) => (tentouSalvar ? erros[campo] : undefined)
+  const erroVisivel = (campo: keyof DadosRegra) =>
+    errosDoServidor[campo] ?? (tentouSalvar ? erros[campo] : undefined)
 
   return (
-    <Dialog open onClose={onCancelar} maxWidth="sm" fullWidth fullScreen={telaPequena}>
+    <Dialog open onClose={salvando ? undefined : onCancelar} maxWidth="sm" fullWidth fullScreen={telaPequena}>
       <form onSubmit={aoEnviar} noValidate>
         <DialogTitle>{inicial ? 'Editar regra' : 'Nova regra'}</DialogTitle>
         <DialogContent dividers>
@@ -99,6 +117,8 @@ function FormularioRegra({ inicial, onSalvar, onCancelar }: Props) {
               )}
             </Stack>
 
+            {erroGeral && <Alert severity="error">{erroGeral}</Alert>}
+
             {valida && (
               <Alert severity="info" icon={false}>
                 <strong>A situação será irregular quando:</strong> {descreverRegra(dados)}
@@ -107,8 +127,10 @@ function FormularioRegra({ inicial, onSalvar, onCancelar }: Props) {
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={onCancelar}>Cancelar</Button>
-          <Button type="submit" variant="contained">
+          <Button onClick={onCancelar} disabled={salvando}>
+            Cancelar
+          </Button>
+          <Button type="submit" variant="contained" loading={salvando}>
             Salvar regra
           </Button>
         </DialogActions>
