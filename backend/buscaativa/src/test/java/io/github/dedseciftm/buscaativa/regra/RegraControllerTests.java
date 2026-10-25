@@ -13,6 +13,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.UUID;
 
+import io.github.dedseciftm.buscaativa.model.RegraIrregularidade;
+import io.github.dedseciftm.buscaativa.model.TipoRegra;
+import io.github.dedseciftm.buscaativa.repository.RegraRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

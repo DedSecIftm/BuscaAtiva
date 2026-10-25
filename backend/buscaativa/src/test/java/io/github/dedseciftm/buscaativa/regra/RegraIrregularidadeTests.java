@@ -2,6 +2,8 @@ package io.github.dedseciftm.buscaativa.regra;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.github.dedseciftm.buscaativa.model.RegraIrregularidade;
+import io.github.dedseciftm.buscaativa.model.TipoRegra;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.Test;
