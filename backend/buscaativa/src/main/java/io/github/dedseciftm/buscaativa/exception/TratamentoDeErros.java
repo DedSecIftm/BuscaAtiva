@@ -13,6 +13,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 /**
  * Responde os erros no formato Problem Details (RFC 9457). Em erros de validação, inclui
@@ -38,6 +40,12 @@ public class TratamentoDeErros extends ResponseEntityExceptionHandler {
 		var problema = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
 				"Os dados enviados não puderam ser lidos. Verifique se todos os campos estão corretos.");
 		return handleExceptionInternal(ex, problema, headers, status, request);
+	}
+
+	/** Login com credenciais erradas: mesma mensagem para senha errada e usuário inexistente. */
+	@ExceptionHandler(AuthenticationException.class)
+	public ProblemDetail handleAuthentication(AuthenticationException ex) {
+		return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "E-mail ou senha inválidos.");
 	}
 
 }

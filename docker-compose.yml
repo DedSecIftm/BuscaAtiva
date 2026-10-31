@@ -26,6 +26,9 @@ services:
       DB_URL: jdbc:postgresql://db:5432/${POSTGRES_DB:-buscaativa}
       DB_USERNAME: ${POSTGRES_USER:-buscaativa}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-buscaativa}
+      SECRET_KEY: ${SECRET_KEY:?Defina SECRET_KEY no arquivo .env}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_SENHA: ${ADMIN_SENHA:-}
     depends_on:
       db:
         condition: service_healthy
