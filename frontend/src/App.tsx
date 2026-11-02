@@ -8,11 +8,17 @@ import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import ImportarFrequencias from './pages/ImportarFrequencias.tsx'
 import RegrasIrregularidade from './pages/RegrasIrregularidade.tsx'
+import Login from './components/Login/Login.tsx'
 
 type Pagina = 'importar' | 'regras'
 
 function App() {
-  const [pagina, setPagina] = useState<Pagina>('importar')
+  const [pagina, setPagina] = useState<Pagina>('importar');
+  const [token, setToken] = useState<string | null>(null);
+
+  if (!token) {
+    return <Login setToken={setToken} />
+  }
 
   return (
     <>
