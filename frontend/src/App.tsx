@@ -9,15 +9,16 @@ import Typography from '@mui/material/Typography'
 import ImportarFrequencias from './pages/ImportarFrequencias.tsx'
 import RegrasIrregularidade from './pages/RegrasIrregularidade.tsx'
 import Login from './components/Login/Login.tsx'
+import useToken from './regras/useToken.ts'
 
 type Pagina = 'importar' | 'regras'
 
 function App() {
   const [pagina, setPagina] = useState<Pagina>('importar');
-  const [token, setToken] = useState<string | null>(null);
+  const { token, setToken } = useToken();
 
   if (!token) {
-    return <Login setToken={setToken} />
+    return <Login setToken={setToken}/>
   }
 
   return (
