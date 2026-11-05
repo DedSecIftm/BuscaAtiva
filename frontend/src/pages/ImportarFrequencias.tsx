@@ -5,53 +5,24 @@ import Button from '@mui/material/Button'
 import Snackbar from '@mui/material/Snackbar'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
+import { useOutletContext } from 'react-router'
 import AreaDeEnvio from '../components/AreaDeEnvio.tsx'
 import ListaDeArquivos from '../components/ListaDeArquivos.tsx'
 import PreviaDoArquivo from '../components/PreviaDoArquivo.tsx'
-import { lerArquivo, tipoDoArquivo } from '../importacao/lerArquivo.ts'
+import { tipoDoArquivo } from '../importacao/lerArquivo.ts'
 import type { ArquivoCarregado } from '../importacao/tipos.ts'
-
-function chaveDoArquivo(arquivo: File): string {
-  return `${arquivo.name}-${arquivo.size}-${arquivo.lastModified}`
-}
+import type { ArquivosImportados } from '../importacao/useArquivosImportados.ts'
 
 function ImportarFrequencias() {
-  const [itens, setItens] = useState<ArquivoCarregado[]>([])
+  const { itens, adicionarArquivos, remover, limpar } = useOutletContext<ArquivosImportados>()
   const [recusados, setRecusados] = useState<string[]>([])
   const [emPrevia, setEmPrevia] = useState<ArquivoCarregado | null>(null)
   const [avisoAberto, setAvisoAberto] = useState(false)
 
-  function atualizar(novo: ArquivoCarregado) {
-    setItens((atuais) => atuais.map((item) => (item.id === novo.id ? novo : item)))
-  }
-
-  function adicionarArquivos(lista: FileList) {
+  function receberArquivos(lista: FileList) {
     const arquivos = Array.from(lista)
     setRecusados(arquivos.filter((a) => !tipoDoArquivo(a)).map((a) => a.name))
-
-    const existentes = new Set(itens.map((item) => item.id))
-    const novos: ArquivoCarregado[] = arquivos
-      .filter((a) => tipoDoArquivo(a) && !existentes.has(chaveDoArquivo(a)))
-      .map((a) => ({ id: chaveDoArquivo(a), arquivo: a, tipo: tipoDoArquivo(a)!, status: 'lendo' }))
-    setItens((atuais) => [...atuais, ...novos])
-
-    novos.forEach(({ id, arquivo, tipo }) => {
-      lerArquivo(arquivo)
-        .then((tabela) => atualizar({ id, arquivo, tipo, status: 'pronto', tabela }))
-        .catch((erro: unknown) =>
-          atualizar({
-            id,
-            arquivo,
-            tipo,
-            status: 'erro',
-            erro: erro instanceof Error ? erro.message : 'Não foi possível ler o arquivo.',
-          }),
-        )
-    })
-  }
-
-  function remover(id: string) {
-    setItens((atuais) => atuais.filter((item) => item.id !== id))
+    adicionarArquivos(arquivos)
   }
 
   const prontos = itens.filter((item) => item.status === 'pronto')
@@ -69,7 +40,7 @@ function ImportarFrequencias() {
         </Typography>
       </Box>
 
-      <AreaDeEnvio onArquivos={adicionarArquivos} />
+      <AreaDeEnvio onArquivos={receberArquivos} />
 
       {recusados.length > 0 && (
         <Alert severity="warning" onClose={() => setRecusados([])}>
@@ -93,7 +64,7 @@ function ImportarFrequencias() {
             : `${prontos.length} ${prontos.length === 1 ? 'arquivo pronto' : 'arquivos prontos'} · ${totalRegistros} ${totalRegistros === 1 ? 'registro' : 'registros'}`}
         </Typography>
         <Stack direction="row" spacing={2}>
-          <Button variant="outlined" disabled={itens.length === 0} onClick={() => setItens([])}>
+          <Button variant="outlined" disabled={itens.length === 0} onClick={limpar}>
             Limpar tudo
           </Button>
           <Button

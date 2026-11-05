@@ -1,4 +1,5 @@
 import type { DadosRegra, Regra } from './tipos.ts'
+import { getToken } from './useToken.ts'
 
 const URL_BASE = '/api/regras'
 
@@ -17,11 +18,16 @@ export class ErroApi extends Error {
 const CAMPOS_DO_SERVIDOR: Record<string, keyof DadosRegra> = { periodoValido: 'periodoEmDias' }
 
 async function requisitar<T>(caminho: string, opcoes: RequestInit = {}): Promise<T> {
+  const token = getToken()
   let resposta: Response
   try {
     resposta = await fetch(URL_BASE + caminho, {
       ...opcoes,
-      headers: { 'Content-Type': 'application/json', ...opcoes.headers },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...opcoes.headers,
+      },
     })
   } catch {
     throw new ErroApi('Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.')
