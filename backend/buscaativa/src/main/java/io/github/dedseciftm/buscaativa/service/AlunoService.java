@@ -73,7 +73,7 @@ public class AlunoService {
         aluno.setMatricula(dados.matricula().trim());
         aluno.setEmail(textoOuNulo(dados.email()));
         aluno.setTelefone(textoOuNulo(dados.telefone()));
-        aluno.setTurma(turmaDe(dados.turma().trim()));
+        aluno.setTurma(turmaDe(dados.turma().trim().replaceAll("\\s+", " ")));
         if (dados.situacao() != null) {
             aluno.setSituacao(dados.situacao());
         }

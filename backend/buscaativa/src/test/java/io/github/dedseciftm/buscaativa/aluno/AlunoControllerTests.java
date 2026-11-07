@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.UUID;
 
 import com.jayway.jsonpath.JsonPath;
+import io.github.dedseciftm.buscaativa.model.Turma;
 import io.github.dedseciftm.buscaativa.repository.AlunoRepository;
 import io.github.dedseciftm.buscaativa.repository.ResponsavelRepository;
 import io.github.dedseciftm.buscaativa.repository.TurmaRepository;
@@ -451,6 +452,31 @@ class AlunoControllerTests {
 				.value("Informe o nome e um contato (e-mail ou telefone) do responsável."));
 
 		assertThat(responsavelRepository.count()).isZero();
+	}
+
+	@Test
+	void importaMesmoComTurmasQueSoDiferemEmEspacosNaBase() throws Exception {
+		turmaRepository.saveAndFlush(new Turma("6º  Ano A"));
+		turmaRepository.saveAndFlush(new Turma("6º Ano A"));
+
+		importar("""
+				{ "alunos": [ { "nome": "Ana Rocha", "turma": "6º Ano A" } ] }
+				""")
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.criados").value(1));
+	}
+
+	@Test
+	void naoCriaTurmaNovaPorCausaDeEspacosRepetidos() throws Exception {
+		cadastrar("""
+				{ "nome": "Ana Rocha", "matricula": "1", "turma": "6º  Ano  A" }
+				""");
+		importar("""
+				{ "alunos": [ { "nome": "Bia Lima", "turma": "6º   Ano A" } ] }
+				""");
+
+		assertThat(turmaRepository.count()).isEqualTo(1);
+		assertThat(turmaRepository.findByNomeIgnoreCase("6º Ano A")).isPresent();
 	}
 
 	@Test

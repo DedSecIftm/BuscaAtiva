@@ -100,9 +100,9 @@ function ImportarFrequencias() {
         </Stack>
       </Stack>
 
-      {resultados.map((item) => (
+      {resultados.map((item, indice) => (
         <ResultadoDaImportacao
-          key={item.nome}
+          key={`${indice}-${item.nome}`}
           item={item}
           onFechar={() => setResultados((atuais) => atuais.filter((r) => r !== item))}
         />

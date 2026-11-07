@@ -136,13 +136,15 @@ public class ImportacaoAlunosService {
 
     /** Turmas usadas no arquivo pelo nome normalizado; as que ainda não existem são criadas. */
     private Map<String, Turma> turmasDe(List<Linha> linhas) {
+        // A base pode ter turmas que só diferem em maiúsculas ou espaços; a primeira encontrada é usada.
         var existentes = turmaRepository.findAll().stream()
-                .collect(Collectors.toMap((turma) -> normalizar(turma.getNome()), Function.identity()));
+                .collect(Collectors.toMap((turma) -> normalizar(turma.getNome()), Function.identity(),
+                        (primeira, outra) -> primeira));
         var turmas = new HashMap<String, Turma>();
         for (var linha : linhas) {
             turmas.computeIfAbsent(normalizar(linha.turma()), (chave) -> existentes.containsKey(chave)
                     ? existentes.get(chave)
-                    : turmaRepository.save(new Turma(linha.turma().trim())));
+                    : turmaRepository.save(new Turma(linha.turma().trim().replaceAll("\\s+", " "))));
         }
         return turmas;
     }

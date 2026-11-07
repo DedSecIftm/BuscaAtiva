@@ -17,7 +17,7 @@ import java.util.Objects;
  * quanto nas linhas já processadas. Quem já existe só tem os campos vazios completados: como pais podem
  * dividir um telefone, sobrescrever trocaria os dados de um pelos do outro.
  */
-class ResponsaveisDoLote {
+class   ResponsaveisDoLote {
 
     private final ResponsavelRepository repository;
     private final Map<String, Responsavel> porEmail = new HashMap<>();
@@ -50,12 +50,13 @@ class ResponsaveisDoLote {
             responsavel.setTelefone(telefone);
             repository.save(responsavel);
             criados++;
-        }
-        if (responsavel.getEmail() == null) {
-            responsavel.setEmail(email);
-        }
-        if (responsavel.getTelefone() == null) {
-            responsavel.setTelefone(telefone);
+        } else {
+            if (responsavel.getEmail() == null) {
+                responsavel.setEmail(email);
+            }
+            if (responsavel.getTelefone() == null) {
+                responsavel.setTelefone(telefone);
+            }
         }
         indexar(responsavel);
         return responsavel;
