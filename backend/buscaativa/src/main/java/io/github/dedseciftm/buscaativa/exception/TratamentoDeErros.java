@@ -3,6 +3,7 @@ package io.github.dedseciftm.buscaativa.exception;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -40,6 +41,13 @@ public class TratamentoDeErros extends ResponseEntityExceptionHandler {
 		var problema = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
 				"Os dados enviados não puderam ser lidos. Verifique se todos os campos estão corretos.");
 		return handleExceptionInternal(ex, problema, headers, status, request);
+	}
+
+	/** Dois envios ao mesmo tempo podem passar pelas verificações do serviço e esbarrar em um índice único. */
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+		return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
+				"Os dados conflitam com um registro já existente. Tente novamente.");
 	}
 
 	/** Login com credenciais erradas: mesma mensagem para senha errada e usuário inexistente. */

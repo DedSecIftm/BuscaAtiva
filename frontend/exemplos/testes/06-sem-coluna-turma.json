@@ -1,0 +1,17 @@
+[
+  {
+    "nome": "Bruno Henriques",
+    "matricula": "20260401",
+    "faltas": 3
+  },
+  {
+    "nome": "Carla Sampaio",
+    "matricula": "20260402",
+    "faltas": 6
+  },
+  {
+    "nome": "Daniel Fontes",
+    "matricula": "20260403",
+    "faltas": 9
+  }
+]
