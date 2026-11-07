@@ -7,11 +7,17 @@ const MAXIMO_DE_ERROS = 10
 
 export type ResultadoDoArquivo = { nome: string } & ({ resultado: Resultado } | { falha: string })
 
-function resumo({ criados, atualizados, erros }: Resultado): string {
+function resumo({ criados, atualizados, responsaveisCriados, responsaveisVinculados, erros }: Resultado): string {
   const partes = [
     `${criados} ${criados === 1 ? 'aluno cadastrado' : 'alunos cadastrados'}`,
     `${atualizados} ${atualizados === 1 ? 'atualizado' : 'atualizados'}`,
   ]
+  if (responsaveisCriados > 0) {
+    partes.push(`${responsaveisCriados} ${responsaveisCriados === 1 ? 'responsável cadastrado' : 'responsáveis cadastrados'}`)
+  }
+  if (responsaveisVinculados > 0) {
+    partes.push(`${responsaveisVinculados} ${responsaveisVinculados === 1 ? 'vínculo criado' : 'vínculos criados'}`)
+  }
   if (erros.length > 0) partes.push(`${erros.length} com erro`)
   return partes.join(' · ')
 }

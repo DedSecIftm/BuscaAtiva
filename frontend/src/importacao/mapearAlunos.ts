@@ -2,7 +2,18 @@ import type { Linha, Tabela } from './lerArquivo.ts'
 
 export type AlunoImportado = Record<Campo, string>
 
-type Campo = 'nome' | 'matricula' | 'email' | 'telefone' | 'turma' | 'faltas' | 'periodoEmDias'
+type Campo =
+  | 'nome'
+  | 'matricula'
+  | 'email'
+  | 'telefone'
+  | 'turma'
+  | 'faltas'
+  | 'periodoEmDias'
+  | 'responsavelNome'
+  | 'responsavelTelefone'
+  | 'responsavelEmail'
+  | 'responsavelParentesco'
 
 // Cada arquivo pode nomear as colunas de um jeito; os nomes aqui ficam sem acento, espaço ou maiúscula.
 const NOMES_DAS_COLUNAS: Record<Campo, string[]> = {
@@ -13,6 +24,10 @@ const NOMES_DAS_COLUNAS: Record<Campo, string[]> = {
   turma: ['turma', 'classe'],
   faltas: ['faltas', 'quantidadedefaltas', 'totaldefaltas'],
   periodoEmDias: ['periodoemdias', 'periodo', 'dias'],
+  responsavelNome: ['responsavel', 'responsavelnome', 'nomedoresponsavel'],
+  responsavelTelefone: ['responsaveltelefone', 'telefonedoresponsavel', 'celulardoresponsavel', 'contatodoresponsavel'],
+  responsavelEmail: ['responsavelemail', 'emaildoresponsavel'],
+  responsavelParentesco: ['parentesco', 'responsavelparentesco', 'grauparentesco', 'graudeparentesco'],
 }
 
 const OBRIGATORIOS: Campo[] = ['nome', 'turma']

@@ -1,5 +1,6 @@
 package io.github.dedseciftm.buscaativa.dto;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -42,7 +43,38 @@ public record ImportacaoAlunosRequest(
             String faltas,
 
             @Pattern(regexp = "|[1-9]\\d{0,5}", message = "O período deve ser um número de dias maior que zero.")
-            String periodoEmDias) {
+            String periodoEmDias,
+
+            @Size(max = 255, message = "O nome do responsável pode ter no máximo 255 caracteres.")
+            String responsavelNome,
+
+            @Size(max = 30, message = "O telefone do responsável pode ter no máximo 30 caracteres.")
+            String responsavelTelefone,
+
+            @Email(message = "E-mail do responsável inválido.")
+            @Size(max = 255, message = "O e-mail do responsável pode ter no máximo 255 caracteres.")
+            String responsavelEmail,
+
+            String responsavelParentesco) {
+
+        public boolean temResponsavel() {
+            return preenchido(responsavelNome) || preenchido(responsavelEmail) || preenchido(responsavelParentesco)
+                    || preenchido(responsavelTelefone);
+        }
+
+        /** O contato é o que reconhece o responsável em outras linhas; o responsável inteiro é opcional. */
+        @AssertTrue(message = "Informe o nome e um contato (e-mail ou telefone) do responsável.")
+        public boolean isResponsavelValido() {
+            if (!temResponsavel()) {
+                return true;
+            }
+            var temTelefone = responsavelTelefone != null && responsavelTelefone.chars().anyMatch(Character::isDigit);
+            return preenchido(responsavelNome) && (preenchido(responsavelEmail) || temTelefone);
+        }
+
+        private static boolean preenchido(String texto) {
+            return texto != null && !texto.isBlank();
+        }
     }
 
 }

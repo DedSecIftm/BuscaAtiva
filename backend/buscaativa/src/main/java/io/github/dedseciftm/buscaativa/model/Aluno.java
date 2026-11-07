@@ -11,6 +11,8 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -52,6 +54,9 @@ public class Aluno {
     @JoinColumn(name = "turma_id", nullable = false)
     private Turma turma;
 
+    @OneToMany(mappedBy = "aluno", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+    private Set<AlunoResponsavel> responsaveis = new HashSet<>();
+
     /** Dados do último arquivo importado. */
     @Min(0)
     private Integer faltas;
@@ -65,4 +70,23 @@ public class Aluno {
 
     /** Exclusão lógica: quando preenchido, o aluno não aparece mais nas consultas. */
     private Instant excluidoEm;
+
+    /**
+     * Cria o vínculo com o responsável ou atualiza o parentesco do vínculo existente; sem parentesco informado,
+     * mantém o atual e, em vínculo novo, usa OUTRO.
+     *
+     * @return se um vínculo novo foi criado
+     */
+    public boolean vincular(Responsavel responsavel, Parentesco parentesco) {
+        for (var vinculo : responsaveis) {
+            if (vinculo.getResponsavel().getId().equals(responsavel.getId())) {
+                if (parentesco != null) {
+                    vinculo.setParentesco(parentesco);
+                }
+                return false;
+            }
+        }
+        var vinculo = new AlunoResponsavel(this, responsavel, parentesco != null ? parentesco : Parentesco.OUTRO);
+        return responsaveis.add(vinculo);
+    }
 }

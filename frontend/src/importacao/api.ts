@@ -4,6 +4,8 @@ import type { AlunoImportado } from './mapearAlunos.ts'
 export interface ResultadoDaImportacao {
   criados: number
   atualizados: number
+  responsaveisCriados: number
+  responsaveisVinculados: number
   erros: { linha: number; mensagem: string }[]
 }
 

@@ -6,6 +6,7 @@ import io.github.dedseciftm.buscaativa.dto.ImportacaoAlunosResponse.ErroDeLinha;
 import io.github.dedseciftm.buscaativa.model.Aluno;
 import io.github.dedseciftm.buscaativa.model.Turma;
 import io.github.dedseciftm.buscaativa.repository.AlunoRepository;
+import io.github.dedseciftm.buscaativa.repository.ResponsavelRepository;
 import io.github.dedseciftm.buscaativa.repository.TurmaRepository;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -24,17 +25,21 @@ import java.util.stream.Collectors;
  * Grava os alunos de um arquivo importado. Reimportar um arquivo atualiza os alunos em vez de duplicá-los:
  * o aluno é reconhecido pela matrícula ou, nos arquivos sem matrícula, pelo nome dentro da turma.
  * Campos que não vieram no arquivo mantêm o valor atual, e um aluno excluído que reaparece volta a valer.
+ * Cada linha pode trazer um responsável; para vincular outro ao mesmo aluno, basta repetir o aluno em nova linha.
  */
 @Service
 public class ImportacaoAlunosService {
 
     private final AlunoRepository repository;
     private final TurmaRepository turmaRepository;
+    private final ResponsavelRepository responsavelRepository;
     private final Validator validator;
 
-    public ImportacaoAlunosService(AlunoRepository repository, TurmaRepository turmaRepository, Validator validator) {
+    public ImportacaoAlunosService(AlunoRepository repository, TurmaRepository turmaRepository,
+                                   ResponsavelRepository responsavelRepository, Validator validator) {
         this.repository = repository;
         this.turmaRepository = turmaRepository;
+        this.responsavelRepository = responsavelRepository;
         this.validator = validator;
     }
 
@@ -60,29 +65,40 @@ public class ImportacaoAlunosService {
         repository.findByTurmaIn(turmas.values())
                 .forEach((aluno) -> porNomeNaTurma.putIfAbsent(chave(aluno.getTurma(), aluno.getNome()), aluno));
 
+        var responsaveis = new ResponsaveisDoLote(responsavelRepository, validas);
         int criados = 0;
         int atualizados = 0;
+        int vinculados = 0;
         for (var linha : validas) {
             var turma = turmas.get(normalizar(linha.turma()));
             var matricula = textoOuNulo(linha.matricula());
             var chaveDoAluno = chave(turma, linha.nome());
 
             var aluno = localizar(matricula, porMatricula, porNomeNaTurma.get(chaveDoAluno));
-            if (aluno == null) {
+            var novo = aluno == null;
+            if (novo) {
                 aluno = new Aluno();
                 criados++;
             } else {
                 atualizados++;
             }
             preencher(aluno, linha, turma);
-            repository.save(aluno);
+            if (linha.temResponsavel()
+                    && aluno.vincular(responsaveis.localizarOuCriar(linha), ResponsaveisDoLote.parentescoDe(linha))) {
+                vinculados++;
+            }
+            // Só o aluno novo: o existente já é gravado pela transação, e save() faria um merge que troca
+            // os vínculos ainda não gravados por cópias vazias.
+            if (novo) {
+                repository.save(aluno);
+            }
 
             porNomeNaTurma.putIfAbsent(chaveDoAluno, aluno);
             if (matricula != null) {
                 porMatricula.put(matricula, aluno);
             }
         }
-        return new ImportacaoAlunosResponse(criados, atualizados, erros);
+        return new ImportacaoAlunosResponse(criados, atualizados, responsaveis.criados(), vinculados, erros);
     }
 
     /** Quem já tem outra matrícula é outra pessoa, mesmo com o mesmo nome na mesma turma. */

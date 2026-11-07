@@ -15,6 +15,7 @@ import java.util.UUID;
 
 import com.jayway.jsonpath.JsonPath;
 import io.github.dedseciftm.buscaativa.repository.AlunoRepository;
+import io.github.dedseciftm.buscaativa.repository.ResponsavelRepository;
 import io.github.dedseciftm.buscaativa.repository.TurmaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,10 +52,14 @@ class AlunoControllerTests {
 	@Autowired
 	private TurmaRepository turmaRepository;
 
+	@Autowired
+	private ResponsavelRepository responsavelRepository;
+
 	@BeforeEach
 	void limpa() {
 		repository.deleteAll();
 		turmaRepository.deleteAll();
+		responsavelRepository.deleteAll();
 	}
 
 	private ResultActions enviar(String corpo) throws Exception {
@@ -282,6 +287,170 @@ class AlunoControllerTests {
 			.andExpect(jsonPath("$.atualizados").value(1));
 
 		mvc.perform(get("/api/alunos/" + id)).andExpect(status().isOk());
+	}
+
+	@Test
+	void irmaosDividemOMesmoResponsavel() throws Exception {
+		importar("""
+				{ "alunos": [
+				  { "nome": "Lia Rocha", "turma": "6º Ano A", "responsavelNome": "Rita Rocha",
+				    "responsavelEmail": "Rita@Exemplo.com", "responsavelParentesco": "Mãe" },
+				  { "nome": "Leo Rocha", "turma": "7º Ano B", "responsavelNome": "Rita Rocha",
+				    "responsavelEmail": "rita@exemplo.com", "responsavelParentesco": "Mãe" }
+				] }
+				""")
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.criados").value(2))
+			.andExpect(jsonPath("$.responsaveisCriados").value(1))
+			.andExpect(jsonPath("$.responsaveisVinculados").value(2));
+
+		mvc.perform(get("/api/alunos"))
+			.andExpect(jsonPath("$[0].responsaveis", hasSize(1)))
+			.andExpect(jsonPath("$[0].responsaveis[0].email").value("rita@exemplo.com"))
+			.andExpect(jsonPath("$[0].responsaveis[0].parentesco").value("mae"))
+			.andExpect(jsonPath("$[1].responsaveis[0].id").isNotEmpty());
+		assertThat(responsavelRepository.count()).isEqualTo(1);
+	}
+
+	@Test
+	void reconheceResponsavelPeloTelefoneEmQualquerFormato() throws Exception {
+		importar("""
+				{ "alunos": [ { "nome": "Lia Rocha", "turma": "6º Ano A", "responsavelNome": "Rita Rocha",
+				  "responsavelTelefone": "(61) 90000-1234", "responsavelParentesco": "tia" } ] }
+				""")
+			.andExpect(jsonPath("$.responsaveisCriados").value(1));
+
+		importar("""
+				{ "alunos": [ { "nome": "Leo Rocha", "turma": "6º Ano A", "responsavelNome": "Rita R.",
+				  "responsavelTelefone": "61 900001234", "responsavelEmail": "rita@exemplo.com" } ] }
+				""")
+			.andExpect(jsonPath("$.responsaveisCriados").value(0))
+			.andExpect(jsonPath("$.responsaveisVinculados").value(1));
+
+		// Campo vazio é completado e o nome já gravado não é sobrescrito.
+		mvc.perform(get("/api/alunos"))
+			.andExpect(jsonPath("$[0].responsaveis[0].nome").value("Rita Rocha"))
+			.andExpect(jsonPath("$[0].responsaveis[0].telefone").value("61900001234"))
+			.andExpect(jsonPath("$[0].responsaveis[0].email").value("rita@exemplo.com"));
+	}
+
+	@Test
+	void parentescoPertenceAoVinculoEntreAlunoEResponsavel() throws Exception {
+		importar("""
+				{ "alunos": [
+				  { "nome": "Ana Rocha", "turma": "6º Ano A", "responsavelNome": "Rita Rocha",
+				    "responsavelEmail": "rita@exemplo.com", "responsavelParentesco": "Mãe" },
+				  { "nome": "Bia Lima", "turma": "6º Ano A", "responsavelNome": "Rita Rocha",
+				    "responsavelEmail": "rita@exemplo.com", "responsavelParentesco": "Tia" }
+				] }
+				""")
+			.andExpect(jsonPath("$.responsaveisCriados").value(1))
+			.andExpect(jsonPath("$.responsaveisVinculados").value(2));
+
+		mvc.perform(get("/api/alunos"))
+			.andExpect(jsonPath("$[0].responsaveis[0].parentesco").value("mae"))
+			.andExpect(jsonPath("$[1].responsaveis[0].parentesco").value("tio"));
+	}
+
+	@Test
+	void reimportarAtualizaOParentescoSemCriarVinculo() throws Exception {
+		var linha = """
+				{ "alunos": [ { "nome": "Ana Rocha", "turma": "6º Ano A", "responsavelNome": "Rita Rocha",
+				  "responsavelEmail": "rita@exemplo.com", "responsavelParentesco": "%s" } ] }
+				""";
+		importar(linha.formatted("Tia"));
+
+		importar(linha.formatted("Tutora"))
+			.andExpect(jsonPath("$.responsaveisVinculados").value(0));
+		mvc.perform(get("/api/alunos")).andExpect(jsonPath("$[0].responsaveis[0].parentesco").value("tutor"));
+
+		importar(linha.formatted(""))
+			.andExpect(jsonPath("$.responsaveisVinculados").value(0));
+		mvc.perform(get("/api/alunos"))
+			.andExpect(jsonPath("$[0].responsaveis", hasSize(1)))
+			.andExpect(jsonPath("$[0].responsaveis[0].parentesco").value("tutor"));
+	}
+
+	@Test
+	void responsavelSemParentescoInformadoFicaComoOutro() throws Exception {
+		importar("""
+				{ "alunos": [ { "nome": "Ana Rocha", "turma": "6º Ano A", "responsavelNome": "Rita Rocha",
+				  "responsavelEmail": "rita@exemplo.com" } ] }
+				""");
+
+		mvc.perform(get("/api/alunos")).andExpect(jsonPath("$[0].responsaveis[0].parentesco").value("outro"));
+	}
+
+	@Test
+	void alunoRepetidoNoArquivoGanhaOutroResponsavel() throws Exception {
+		var arquivo = """
+				{ "alunos": [
+				  { "nome": "Lia Rocha", "matricula": "10", "turma": "6º Ano A", "responsavelNome": "Rita Rocha",
+				    "responsavelEmail": "rita@exemplo.com", "responsavelParentesco": "mae" },
+				  { "nome": "Lia Rocha", "matricula": "10", "turma": "6º Ano A", "responsavelNome": "Caio Rocha",
+				    "responsavelEmail": "caio@exemplo.com", "responsavelParentesco": "pai" }
+				] }
+				""";
+
+		importar(arquivo)
+			.andExpect(jsonPath("$.criados").value(1))
+			.andExpect(jsonPath("$.atualizados").value(1))
+			.andExpect(jsonPath("$.responsaveisCriados").value(2))
+			.andExpect(jsonPath("$.responsaveisVinculados").value(2));
+
+		importar(arquivo)
+			.andExpect(jsonPath("$.responsaveisCriados").value(0))
+			.andExpect(jsonPath("$.responsaveisVinculados").value(0));
+
+		mvc.perform(get("/api/alunos"))
+			.andExpect(jsonPath("$", hasSize(1)))
+			.andExpect(jsonPath("$[0].responsaveis", hasSize(2)))
+			.andExpect(jsonPath("$[0].responsaveis[0].nome").value("Caio Rocha"))
+			.andExpect(jsonPath("$[0].responsaveis[1].parentesco").value("mae"));
+	}
+
+	@Test
+	void reimportarMantemResponsaveisQueNaoVieramNoArquivo() throws Exception {
+		importar("""
+				{ "alunos": [ { "nome": "Lia Rocha", "turma": "6º Ano A", "responsavelNome": "Rita Rocha",
+				  "responsavelEmail": "rita@exemplo.com" } ] }
+				""");
+
+		importar("""
+				{ "alunos": [ { "nome": "Lia Rocha", "turma": "6º Ano A", "faltas": "2" } ] }
+				""")
+			.andExpect(jsonPath("$.atualizados").value(1));
+
+		mvc.perform(get("/api/alunos")).andExpect(jsonPath("$[0].responsaveis", hasSize(1)));
+	}
+
+	@Test
+	void parentescoForaDaListaViraOutro() throws Exception {
+		importar("""
+				{ "alunos": [ { "nome": "Lia Rocha", "turma": "6º Ano A", "responsavelNome": "Vera Rocha",
+				  "responsavelTelefone": "61900001234", "responsavelParentesco": "Avó" } ] }
+				""");
+
+		mvc.perform(get("/api/alunos"))
+			.andExpect(jsonPath("$[0].responsaveis[0].parentesco").value("outro"));
+	}
+
+	@Test
+	void responsavelIncompletoGeraErroNaLinhaSemGravarOAluno() throws Exception {
+		importar("""
+				{ "alunos": [
+				  { "nome": "Sem contato", "turma": "6º Ano A", "responsavelNome": "Rita Rocha" },
+				  { "nome": "Sem nome", "turma": "6º Ano A", "responsavelEmail": "rita@exemplo.com" },
+				  { "nome": "E-mail errado", "turma": "6º Ano A", "responsavelNome": "Rita", "responsavelEmail": "x" },
+				  { "nome": "Sem responsável", "turma": "6º Ano A" }
+				] }
+				""")
+			.andExpect(jsonPath("$.criados").value(1))
+			.andExpect(jsonPath("$.erros", hasSize(3)))
+			.andExpect(jsonPath("$.erros[0].mensagem")
+				.value("Informe o nome e um contato (e-mail ou telefone) do responsável."));
+
+		assertThat(responsavelRepository.count()).isZero();
 	}
 
 	@Test
