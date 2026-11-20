@@ -1,18 +1,16 @@
 import { ErroApi } from '../regras/api.ts'
-import { getToken } from '../regras/useToken.ts'
+import { fetchAutenticado } from '../autenticacao/fetchAutenticado.ts'
 import type { DadosUsuario, UsuarioAtual } from './tipos.ts'
 
 const URL_BASE = '/api/users'
 
 async function requisitar(caminho: string, opcoes: RequestInit = {}): Promise<Response> {
-  const token = getToken()
   let resposta: Response
   try {
-    resposta = await fetch(URL_BASE + caminho, {
+    resposta = await fetchAutenticado(URL_BASE + caminho, {
       ...opcoes,
       headers: {
         'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` }),
       },
     })
   } catch {

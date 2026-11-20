@@ -1,4 +1,4 @@
-import { getToken } from '../regras/useToken.ts'
+import { fetchAutenticado } from '../autenticacao/fetchAutenticado.ts'
 import type { AlunoImportado } from './mapearAlunos.ts'
 
 export interface ResultadoDaImportacao {
@@ -10,14 +10,12 @@ export interface ResultadoDaImportacao {
 }
 
 export async function importarAlunos(alunos: AlunoImportado[]): Promise<ResultadoDaImportacao> {
-  const token = getToken()
   let resposta: Response
   try {
-    resposta = await fetch('/api/alunos/importacao', {
+    resposta = await fetchAutenticado('/api/alunos/importacao', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` }),
       },
       body: JSON.stringify({ alunos }),
     })
