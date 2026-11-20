@@ -85,6 +85,7 @@ class RegraControllerTests {
 
 	@Test
 	void listaAtualizaEExclui() throws Exception {
+		repository.deleteAll();
 		var regra = repository.save(new RegraIrregularidade("Faltas seguidas", TipoRegra.SEGUIDAS, 3, null));
 		repository.save(new RegraIrregularidade("Faltas frequentes", TipoRegra.NO_PERIODO, 3, 10));
 
