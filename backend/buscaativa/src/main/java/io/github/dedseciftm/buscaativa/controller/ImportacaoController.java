@@ -34,9 +34,6 @@ public class ImportacaoController {
 		try (var conteudo = arquivo.getInputStream()) {
 			return service.importar(conteudo);
 		}
-		catch (org.apache.poi.EmptyFileException | org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException e) {
-			throw new PlanilhaInvalidaException("O arquivo não é uma planilha .xlsx válida.");
-		}
 	}
 
 }

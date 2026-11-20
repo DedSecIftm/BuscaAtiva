@@ -14,9 +14,13 @@ import jakarta.validation.constraints.NotNull;
 @Table(name = "turma")
 public class Turma {
 
+	/** Tamanhos das colunas; a importação confere a planilha contra esses limites. */
+	public static final int ID_MAX = 12;
+	public static final int TIPO_ENSINO_MAX = 15;
+
 	@Id
 	@NotBlank
-	@Column(length = 12)
+	@Column(length = ID_MAX)
 	private String idTurma;
 
 	@NotNull
@@ -29,7 +33,7 @@ public class Turma {
 	private NivelEscolar nivelEscolar;
 
 	/** Código do tipo de ensino e da turma na planilha, por exemplo "REG 1". */
-	@Column(length = 15)
+	@Column(length = TIPO_ENSINO_MAX)
 	private String tipoEnsino;
 
 	/** A planilha não informa o período; fica vazio até ser definido. */

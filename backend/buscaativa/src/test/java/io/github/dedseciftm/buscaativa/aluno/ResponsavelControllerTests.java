@@ -86,6 +86,29 @@ class ResponsavelControllerTests {
 	}
 
 	@Test
+	void rejeitaTelefoneSemDigitosOuComDigitosDemaisOuDeMenos() throws Exception {
+		for (var telefone : new String[] { "----------", "((((((((((", "123456789", "12345678901234", "34 9999-12a4" }) {
+			mvc.perform(post("/api/alunos/" + ALUNO + "/responsaveis").contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{ "nome": "Ana", "grauParentesco": "Mãe", "telefone": "%s" }
+							""".formatted(telefone)))
+				.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.erros.telefone").exists());
+		}
+	}
+
+	@Test
+	void aceitaTelefonesComEFormatacaoOuComDDI() throws Exception {
+		for (var telefone : new String[] { "34999991234", "(34) 99999-1234", "+55 (34) 99999-1234", "3433221100" }) {
+			mvc.perform(post("/api/alunos/" + ALUNO + "/responsaveis").contentType(MediaType.APPLICATION_JSON)
+					.content("""
+							{ "nome": "Ana", "grauParentesco": "Mãe", "telefone": "%s" }
+							""".formatted(telefone)))
+				.andExpect(status().isCreated());
+		}
+	}
+
+	@Test
 	void naoCadastraResponsavelParaAlunoInexistente() throws Exception {
 		mvc.perform(post("/api/alunos/NAO-EXISTE/responsaveis").contentType(MediaType.APPLICATION_JSON).content("""
 				{ "nome": "Ana", "grauParentesco": "Mãe", "telefone": "34999991234" }

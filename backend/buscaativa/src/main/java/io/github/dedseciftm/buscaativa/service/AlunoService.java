@@ -1,12 +1,15 @@
 package io.github.dedseciftm.buscaativa.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import io.github.dedseciftm.buscaativa.dto.AlunoResponse;
 import io.github.dedseciftm.buscaativa.exception.AlunoNaoEncontradoException;
 import io.github.dedseciftm.buscaativa.model.Aluno;
 import io.github.dedseciftm.buscaativa.repository.AlunoRepository;
 import io.github.dedseciftm.buscaativa.repository.ResponsavelRepository;
+import io.github.dedseciftm.buscaativa.repository.ResponsavelRepository.ContagemPorAluno;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,17 +28,20 @@ public class AlunoService {
 
 	/** Lista todos os alunos ou, se {@code idTurma} for informado, só os da turma. */
 	public List<AlunoResponse> listar(String idTurma) {
-		List<Aluno> alunos = (idTurma == null || idTurma.isBlank()) ? repository.findAllByOrderByNomeAsc()
+		boolean todos = idTurma == null || idTurma.isBlank();
+		List<Aluno> alunos = todos ? repository.findAllByOrderByNomeAsc()
 				: repository.findAllByTurmaIdTurmaOrderByNomeAsc(idTurma);
-		return alunos.stream().map(this::resposta).toList();
+		List<ContagemPorAluno> contagens = todos ? responsaveis.contarPorAluno()
+				: responsaveis.contarPorAlunoDaTurma(idTurma);
+
+		Map<String, Long> totais = new HashMap<>();
+		contagens.forEach(c -> totais.put(c.getIdDoAluno(), c.getTotal()));
+		return alunos.stream().map(a -> AlunoResponse.de(a, totais.getOrDefault(a.getIdDoAluno(), 0L))).toList();
 	}
 
 	public AlunoResponse buscar(String id) {
-		return resposta(repository.findById(id).orElseThrow(() -> new AlunoNaoEncontradoException(id)));
-	}
-
-	private AlunoResponse resposta(Aluno aluno) {
-		return AlunoResponse.de(aluno, responsaveis.countByAlunoIdDoAluno(aluno.getIdDoAluno()));
+		var aluno = repository.findById(id).orElseThrow(() -> new AlunoNaoEncontradoException(id));
+		return AlunoResponse.de(aluno, responsaveis.countByAlunoIdDoAluno(id));
 	}
 
 }

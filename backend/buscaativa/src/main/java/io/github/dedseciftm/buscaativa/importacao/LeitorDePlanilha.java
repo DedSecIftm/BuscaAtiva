@@ -9,11 +9,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.github.dedseciftm.buscaativa.model.Aluno;
+import io.github.dedseciftm.buscaativa.model.Turma;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.stereotype.Component;
 
@@ -34,7 +37,7 @@ public class LeitorDePlanilha {
 	private static final String FALTAS = "faltas";
 
 	public Resultado ler(InputStream arquivo) throws IOException {
-		try (var workbook = WorkbookFactory.create(arquivo)) {
+		try (var workbook = abrir(arquivo)) {
 			Sheet aba = workbook.getSheetAt(0);
 			var formatador = new DataFormatter();
 
@@ -70,19 +73,42 @@ public class LeitorDePlanilha {
 		}
 	}
 
+	// Arquivo vazio, corrompido ou que não é planilha: o POI lança exceções variadas; para o usuário é tudo "inválido".
+	private static Workbook abrir(InputStream arquivo) throws IOException {
+		try {
+			return WorkbookFactory.create(arquivo);
+		}
+		catch (IOException | RuntimeException e) {
+			throw new PlanilhaInvalidaException("O arquivo não é uma planilha .xlsx válida.");
+		}
+	}
+
 	private static LinhaDaPlanilha converter(int numero, Row row, Map<String, Integer> colunas, DataFormatter f) {
 		String textoTurma = texto(row, colunas.get(TURMA), f);
 
 		var turma = TurmaDaPlanilha.ler(textoTurma)
 			.orElseThrow(() -> new IllegalArgumentException("turma em formato inesperado: \"" + textoTurma + "\""));
 
-		String id = texto(row, colunas.get(ID), f);
+		if (turma.idTurma().length() > Turma.ID_MAX) {
+			throw new IllegalArgumentException("id da turma com mais de " + Turma.ID_MAX + " caracteres");
+		}
+		if (turma.tipoEnsino().length() > Turma.TIPO_ENSINO_MAX) {
+			throw new IllegalArgumentException("tipo de ensino com mais de " + Turma.TIPO_ENSINO_MAX + " caracteres");
+		}
+
+		String id = textoDoId(row, colunas.get(ID), f);
 		if (id.isEmpty()) {
 			throw new IllegalArgumentException("ID SIMADE vazio");
+		}
+		if (id.length() > Aluno.ID_MAX) {
+			throw new IllegalArgumentException("ID SIMADE com mais de " + Aluno.ID_MAX + " caracteres");
 		}
 		String nome = texto(row, colunas.get(ESTUDANTE), f);
 		if (nome.isEmpty()) {
 			throw new IllegalArgumentException("nome do estudante vazio");
+		}
+		if (nome.length() > Aluno.NOME_MAX) {
+			throw new IllegalArgumentException("nome do estudante com mais de " + Aluno.NOME_MAX + " caracteres");
 		}
 		return new LinhaDaPlanilha(numero, turma, id, nome, numero(row, colunas.get(PRESENCA), f, "% de presença"),
 				numero(row, colunas.get(FALTAS), f, "faltas").intValue());
@@ -112,6 +138,18 @@ public class LeitorDePlanilha {
 	private static String texto(Row row, int coluna, DataFormatter f) {
 		Cell cell = row.getCell(coluna);
 		return cell == null ? "" : f.formatCellValue(cell).trim();
+	}
+
+	// Número inteiro do Excel vira texto sem notação científica (o formato "Geral" mostraria 1,23457E+16).
+	private static String textoDoId(Row row, int coluna, DataFormatter f) {
+		Cell cell = row.getCell(coluna);
+		if (cell != null && cell.getCellType() == CellType.NUMERIC) {
+			double valor = cell.getNumericCellValue();
+			if (valor == Math.rint(valor) && !Double.isInfinite(valor)) {
+				return new BigDecimal(valor).toBigInteger().toString();
+			}
+		}
+		return texto(row, coluna, f);
 	}
 
 	// Aceita número do Excel ou texto com vírgula decimal ("20,93").

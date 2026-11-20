@@ -4,7 +4,7 @@ COPY mvnw pom.xml ./
 COPY .mvn .mvn
 RUN --mount=type=cache,target=/root/.m2 ./mvnw -q dependency:go-offline
 COPY src src
-# Os testes precisam do banco de dados, então rodam fora da construção da imagem.
+# Os testes sobem um PostgreSQL próprio (Testcontainers) e precisam do Docker, então rodam fora da construção da imagem.
 RUN --mount=type=cache,target=/root/.m2 ./mvnw -q package -DskipTests
 
 FROM eclipse-temurin:25-jre-alpine

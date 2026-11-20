@@ -16,9 +16,13 @@ import jakarta.validation.constraints.Size;
 @Table(name = "aluno")
 public class Aluno {
 
+	/** Tamanhos das colunas; a importação confere a planilha contra esses limites. */
+	public static final int ID_MAX = 16;
+	public static final int NOME_MAX = 100;
+
 	@Id
 	@NotBlank
-	@Column(length = 16)
+	@Column(length = ID_MAX)
 	private String idDoAluno;
 
 	@NotNull
@@ -27,8 +31,8 @@ public class Aluno {
 	private Turma turma;
 
 	@NotBlank
-	@Size(max = 100)
-	@Column(nullable = false, length = 100)
+	@Size(max = NOME_MAX)
+	@Column(nullable = false, length = NOME_MAX)
 	private String nome;
 
 	protected Aluno() {
