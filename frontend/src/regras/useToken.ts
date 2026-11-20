@@ -1,34 +1,33 @@
-import { useCallback, useState } from "react";
+import { useEffect, useSyncExternalStore } from 'react'
+import { encerrarSessao, expiracaoDoToken, getToken, observarSessao, salvarToken, sessaoExpirou } from '../autenticacao/sessao.ts'
 
-export type UserToken = {
-    token:string
-}
+export type { UserToken } from '../autenticacao/sessao.ts'
+export { getToken }
 
-export function getToken(): string | null {
-    const tokenString = localStorage.getItem('token');
-    if (!tokenString) return null;
+// setTimeout aceita no máximo ~24,8 dias; acima disso dispararia na hora.
+const ESPERA_MAXIMA = 2 ** 31 - 1
 
-    const userToken = JSON.parse(tokenString);
-    return userToken?.token ?? null;
-}
+// Estável entre renderizações: é dependência do efeito que busca o usuário atual.
+const removeToken = () => encerrarSessao()
 
 export default function useToken() {
-    const [token, setToken] = useState<string | null>(getToken());
+  const token = useSyncExternalStore(observarSessao, getToken)
+  const expirou = useSyncExternalStore(observarSessao, sessaoExpirou)
 
-    const saveToken = (userToken: UserToken) => {
-        localStorage.setItem('token', JSON.stringify(userToken));
-        setToken(userToken.token);
-    }
+  // Encerra a sessão no instante em que o token vence, sem esperar a próxima requisição.
+  useEffect(() => {
+    if (!token) return
+    const expiracao = expiracaoDoToken(token)
+    if (expiracao === null) return
+    const espera = Math.min(Math.max(expiracao - Date.now(), 0), ESPERA_MAXIMA)
+    const temporizador = setTimeout(() => encerrarSessao(true), espera)
+    return () => clearTimeout(temporizador)
+  }, [token])
 
-    // Estável entre renderizações: é dependência do efeito que busca o usuário atual.
-    const removeToken = useCallback(() => {
-        localStorage.removeItem('token');
-        setToken(null);
-    }, []);
-
-    return {
-        token,
-        setToken: saveToken,
-        removeToken
-    }
+  return {
+    token,
+    expirou,
+    setToken: salvarToken,
+    removeToken,
+  }
 }

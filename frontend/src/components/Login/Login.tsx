@@ -9,13 +9,14 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { entrar, ErroLogin } from "../../autenticacao/api";
 import type { ErrosDoLogin } from "../../autenticacao/api";
-import type { UserToken } from "../../regras/useToken";
+import type { UserToken } from "../../autenticacao/sessao";
 
 type LoginProps = {
     setToken: (userToken: UserToken) => void;
+    sessaoExpirada?: boolean;
 }
 
-export default function Login({ setToken }: LoginProps) {
+export default function Login({ setToken, sessaoExpirada = false }: LoginProps) {
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
     const [enviando, setEnviando] = useState(false);
@@ -47,6 +48,7 @@ export default function Login({ setToken }: LoginProps) {
                     Faça login
                 </Typography>
                 <Stack spacing={2}>
+                    {sessaoExpirada && !erro && <Alert severity="warning">Sua sessão expirou. Entre novamente para continuar.</Alert>}
                     {erro && <Alert severity="error">{erro}</Alert>}
                     <TextField
                         id="email"

@@ -1,4 +1,4 @@
-import type { UserToken } from '../regras/useToken.ts'
+import type { UserToken } from './sessao.ts'
 
 export type Credenciais = {
   email: string

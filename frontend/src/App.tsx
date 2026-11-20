@@ -8,13 +8,13 @@ import RegrasIrregularidade from './pages/RegrasIrregularidade.tsx'
 import useToken from './regras/useToken.ts'
 
 function App() {
-  const { token, setToken, removeToken } = useToken()
+  const { token, expirou, setToken, removeToken } = useToken()
 
   return (
     <Routes>
       <Route
         path="/login"
-        element={token ? <Navigate to="/" replace /> : <Login setToken={setToken} />}
+        element={token ? <Navigate to="/" replace /> : <Login setToken={setToken} sessaoExpirada={expirou} />}
       />
       <Route
         element={

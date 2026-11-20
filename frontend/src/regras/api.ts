@@ -1,5 +1,5 @@
 import type { DadosRegra, Regra } from './tipos.ts'
-import { getToken } from './useToken.ts'
+import { fetchAutenticado } from '../autenticacao/fetchAutenticado.ts'
 
 const URL_BASE = '/api/regras'
 
@@ -20,14 +20,12 @@ export class ErroApi<T = DadosRegra> extends Error {
 const CAMPOS_DO_SERVIDOR: Record<string, keyof DadosRegra> = { periodoValido: 'periodoEmDias' }
 
 async function requisitar<T>(caminho: string, opcoes: RequestInit = {}): Promise<T> {
-  const token = getToken()
   let resposta: Response
   try {
-    resposta = await fetch(URL_BASE + caminho, {
+    resposta = await fetchAutenticado(URL_BASE + caminho, {
       ...opcoes,
       headers: {
         'Content-Type': 'application/json',
-        ...(token && { Authorization: `Bearer ${token}` }),
         ...opcoes.headers,
       },
     })
