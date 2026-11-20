@@ -2,10 +2,14 @@ Projeto busca ativa
 
 - Requisitos funcionais:
 
- 	- O usuário importa alunos e suas respectivas situações quanto à presença nas aulas;
-	- Enviar mensagens para alunos com situações irregulares de presença em diferente cenários de inadimplência;
-	- Criar cenários de irregularidade com dias e quantidades de faltas diferentes;
+ 	- O usuário importa arquivo xlsx com colunas :turma(string unica com ano, nivel escolar, codigo de tipo de ensino e o id da turma), estudante , % de presença e numero de faltas;
+	- O usuário é capaz de realizar o cadastro de um responsável ( nome, grauParentesco, email (opcional), telefone) relacionado a um aluno;
+	- O sistema envia mensagem no whatsapp para o responsável de cada aluno na lista importada com uma mensagem compatível com a situação do aluno;
+	- O usuário pode cadastrar situações de irregularidade e atrelar mensagens específicas para o caso;
+	- O usuário pode cadastrar tipos de mensagens;
+	- Criar cenários de irregularidade com dias e quantidades de faltas diferentes; 
 	- Gerar relatórios com as estatísticas das mensagens enviadas.
+	- Antes do envio, o sistema deve anunciar a quantidade de alunos com responsáveis cadastrados e oferecer o cadastro para aqueles que não o possuem.
 
 - Requisitos não funcionais:
 
@@ -20,3 +24,39 @@ Projeto busca ativa
 	- Capacidade de expansão conforme o aumento da quantidade de alunos; 
 	- Registro e rastreabilidade das mensagens enviadas; 
 	- Realização de backup e recuperação dos dados.
+
+# Entidades
+
+## Aluno
+
+	- IdDoAluno : String
+	- Turma : Turma 
+	- Nome : String
+	
+
+## Turma 
+
+	- IdTurma : String
+	- Ano : int
+	- NivelEscolar : [FUNDAMENTAL, MEDIO]
+	- Periodo: [MANHA, TARDE, NOITE]
+
+## Responsavel
+
+	- Id : String
+	- Nome: String
+	- GrauParentesco: String
+	- Telefone: String
+	- Email (Opcional): String
+
+## Importacao
+
+	- Id: String
+	- DataHora: LocalDateTime
+	- periodoReferente: inicio - fim LocalDate
+	- alunosIrregulares: List<AlunoIrregular>
+
+## AlunoIrregular
+
+	- IdAluno (FK) : String
+	- IdImportacao (FK) : String
