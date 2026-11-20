@@ -1,0 +1,14 @@
+package io.github.dedseciftm.buscaativa.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
+import org.springframework.web.ErrorResponseException;
+
+public class AlunoNaoEncontradoException extends ErrorResponseException {
+
+	public AlunoNaoEncontradoException(String id) {
+		super(HttpStatus.NOT_FOUND, ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, "Aluno não encontrado: " + id),
+				null);
+	}
+
+}
