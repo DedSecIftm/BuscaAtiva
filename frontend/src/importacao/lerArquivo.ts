@@ -1,4 +1,5 @@
-export type TipoArquivo = 'Excel' | 'XML' | 'JSON'
+// O backend só importa planilhas .xlsx. A leitura aqui serve apenas para mostrar a prévia antes de enviar.
+export type TipoArquivo = 'Excel'
 
 export type Linha = Record<string, string>
 
@@ -9,9 +10,6 @@ export interface Tabela {
 
 const EXTENSOES: Record<string, TipoArquivo> = {
   xlsx: 'Excel',
-  xls: 'Excel',
-  xml: 'XML',
-  json: 'JSON',
 }
 
 export function tipoDoArquivo(arquivo: File): TipoArquivo | undefined {
@@ -33,8 +31,23 @@ function paraTexto(valor: unknown): string {
   return String(valor)
 }
 
-function normalizarLinha(objeto: Record<string, unknown>): Linha {
-  return Object.fromEntries(Object.entries(objeto).map(([chave, valor]) => [chave, paraTexto(valor)]))
+const COLUNAS_ESPERADAS = ['turma', 'idsimade', 'estudante', '%depresenca', 'faltas']
+
+function normalizar(texto: string): string {
+  return texto
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .replace(/\s+/g, '')
+    .toLowerCase()
+}
+
+// Como no backend, o cabeçalho pode vir depois de linhas de título: procura nas primeiras linhas a que tem todas as
+// colunas esperadas. Devolve -1 se nenhuma linha tiver.
+function posicaoDoCabecalho(linhas: unknown[][]): number {
+  return linhas.slice(0, 20).findIndex((linha) => {
+    const nomes = new Set(linha.map((celula) => normalizar(paraTexto(celula))))
+    return COLUNAS_ESPERADAS.every((coluna) => nomes.has(coluna))
+  })
 }
 
 // A biblioteca de Excel é grande, então só é carregada quando necessária.
@@ -42,55 +55,27 @@ async function lerExcel(arquivo: File): Promise<Tabela> {
   const { read, utils } = await import('xlsx')
   const planilha = read(await arquivo.arrayBuffer(), { cellDates: true })
   const primeiraAba = planilha.Sheets[planilha.SheetNames[0]]
-  const linhas = utils.sheet_to_json<Record<string, unknown>>(primeiraAba, { defval: '' })
-  return montarTabela(linhas.map(normalizarLinha))
-}
+  const matriz = utils.sheet_to_json<unknown[]>(primeiraAba, { header: 1, defval: '' })
 
-// Aceita uma lista de objetos ou um objeto que contenha uma lista de objetos.
-async function lerJson(arquivo: File): Promise<Tabela> {
-  let dados: unknown
-  try {
-    dados = JSON.parse(await arquivo.text())
-  } catch {
-    throw new Error('O arquivo JSON está com formato inválido.')
-  }
-  const lista = Array.isArray(dados)
-    ? dados
-    : Object.values(dados as object).find((valor) => Array.isArray(valor))
-  if (!lista) throw new Error('Não foi encontrada uma lista de registros no arquivo JSON.')
-  return montarTabela(
-    lista.filter((item) => item && typeof item === 'object').map((item) => normalizarLinha(item)),
-  )
-}
+  const achado = posicaoDoCabecalho(matriz)
+  const cabecalho = Math.max(achado, 0)
+  const nomes = (matriz[cabecalho] ?? []).map((celula, indice) => paraTexto(celula).trim() || `Coluna ${indice + 1}`)
 
-// Cada filho do elemento raiz é um registro; os campos vêm dos atributos e dos elementos filhos.
-async function lerXml(arquivo: File): Promise<Tabela> {
-  const documento = new DOMParser().parseFromString(await arquivo.text(), 'application/xml')
-  if (documento.querySelector('parsererror')) throw new Error('O arquivo XML está com formato inválido.')
+  // Com o cabeçalho reconhecido, mostra só as colunas que a importação usa; outras (listas auxiliares, colunas
+  // vazias) ficam de fora para não parecerem parte da importação. Sem cabeçalho reconhecido, mostra tudo.
+  const posicoes = nomes
+    .map((_, indice) => indice)
+    .filter((indice) => achado < 0 || COLUNAS_ESPERADAS.includes(normalizar(nomes[indice])))
 
-  let registros = Array.from(documento.documentElement.children)
-  // Se a raiz tiver um único filho que agrupa os registros (ex.: <dados><alunos><aluno/>...), desce um nível.
-  while (registros.length === 1 && registros[0].children.length > 0 && registros[0].children[0].children.length > 0) {
-    registros = Array.from(registros[0].children)
-  }
-
-  const linhas = registros.map((registro) => {
-    const linha: Linha = {}
-    Array.from(registro.attributes).forEach((atributo) => (linha[atributo.name] = atributo.value))
-    Array.from(registro.children).forEach((campo) => (linha[campo.tagName] = campo.textContent?.trim() ?? ''))
-    return linha
-  })
+  const linhas = matriz
+    .slice(cabecalho + 1)
+    .filter((linha) => posicoes.some((indice) => paraTexto(linha[indice]).trim() !== ''))
+    .map((linha) => Object.fromEntries(posicoes.map((indice) => [nomes[indice], paraTexto(linha[indice])])))
   return montarTabela(linhas)
-}
-
-const LEITORES: Record<TipoArquivo, (arquivo: File) => Promise<Tabela>> = {
-  Excel: lerExcel,
-  XML: lerXml,
-  JSON: lerJson,
 }
 
 export function lerArquivo(arquivo: File): Promise<Tabela> {
   const tipo = tipoDoArquivo(arquivo)
   if (!tipo) return Promise.reject(new Error('Formato de arquivo não aceito.'))
-  return LEITORES[tipo](arquivo)
+  return lerExcel(arquivo)
 }

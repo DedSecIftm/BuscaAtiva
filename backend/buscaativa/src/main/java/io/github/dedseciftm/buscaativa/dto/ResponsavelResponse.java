@@ -1,17 +1,15 @@
 package io.github.dedseciftm.buscaativa.dto;
 
-import io.github.dedseciftm.buscaativa.model.AlunoResponsavel;
-import io.github.dedseciftm.buscaativa.model.Parentesco;
-
 import java.util.UUID;
 
-/** Responsável visto a partir de um aluno: {@code parentesco} é a relação com esse aluno. */
-public record ResponsavelResponse(UUID id, String nome, String telefone, String email, Parentesco parentesco) {
+import io.github.dedseciftm.buscaativa.model.Responsavel;
 
-    public static ResponsavelResponse de(AlunoResponsavel vinculo) {
-        var responsavel = vinculo.getResponsavel();
-        return new ResponsavelResponse(responsavel.getId(), responsavel.getNome(), responsavel.getTelefone(),
-                responsavel.getEmail(), vinculo.getParentesco());
-    }
+public record ResponsavelResponse(UUID id, String idDoAluno, String nome, String grauParentesco, String telefone,
+		String email) {
+
+	public static ResponsavelResponse de(Responsavel r) {
+		return new ResponsavelResponse(r.getId(), r.getAluno().getIdDoAluno(), r.getNome(), r.getGrauParentesco(),
+				r.getTelefone(), r.getEmail());
+	}
 
 }

@@ -58,7 +58,7 @@ function AreaDeEnvio({ onArquivos }: Props) {
         type="file"
         hidden
         multiple
-        accept=".xlsx,.xls,.xml,.json"
+        accept=".xlsx"
         onChange={aoSelecionar}
       />
     </Paper>

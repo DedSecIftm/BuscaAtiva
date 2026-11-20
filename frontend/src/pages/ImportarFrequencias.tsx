@@ -9,9 +9,8 @@ import AreaDeEnvio from '../components/AreaDeEnvio.tsx'
 import ListaDeArquivos from '../components/ListaDeArquivos.tsx'
 import PreviaDoArquivo from '../components/PreviaDoArquivo.tsx'
 import ResultadoDaImportacao, { type ResultadoDoArquivo } from '../components/ResultadoDaImportacao.tsx'
-import { importarAlunos } from '../importacao/api.ts'
+import { importarPlanilha } from '../importacao/api.ts'
 import { tipoDoArquivo } from '../importacao/lerArquivo.ts'
-import { mapearAlunos } from '../importacao/mapearAlunos.ts'
 import type { ArquivoCarregado } from '../importacao/tipos.ts'
 import type { ArquivosImportados } from '../importacao/useArquivosImportados.ts'
 
@@ -39,7 +38,7 @@ function ImportarFrequencias() {
     for (const item of prontos) {
       const nome = item.arquivo.name
       try {
-        const resultado = await importarAlunos(mapearAlunos(item.tabela))
+        const resultado = await importarPlanilha(item.arquivo)
         setResultados((atuais) => [...atuais, { nome, resultado }])
         remover(item.id)
       } catch (erro) {
@@ -57,7 +56,8 @@ function ImportarFrequencias() {
           Importar frequências dos alunos
         </Typography>
         <Typography color="text.secondary">
-          Envie o arquivo exportado do sistema da escola. Formatos aceitos: Excel, XML ou JSON.
+          Envie a planilha exportada do sistema da escola, com as colunas Turma, ID SIMADE, Estudante, % de
+          presença e Faltas. Formato aceito: Excel (.xlsx).
         </Typography>
       </Box>
 
@@ -68,7 +68,7 @@ function ImportarFrequencias() {
           {recusados.length === 1
             ? `O arquivo "${recusados[0]}" não é aceito.`
             : `Os arquivos ${recusados.map((n) => `"${n}"`).join(', ')} não são aceitos.`}{' '}
-          Use Excel, XML ou JSON.
+          Use uma planilha Excel (.xlsx).
         </Alert>
       )}
 

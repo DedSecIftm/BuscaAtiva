@@ -1,92 +1,67 @@
 package io.github.dedseciftm.buscaativa.model;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Min;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
+/** Aluno criado a partir da importação da planilha; não é cadastrado manualmente. */
 @Entity
 @Table(name = "aluno")
-@Getter
-@Setter
 public class Aluno {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+	/** Tamanhos das colunas; a importação confere a planilha contra esses limites. */
+	public static final int ID_MAX = 16;
+	public static final int NOME_MAX = 100;
 
-    @NotBlank
-    @Size(min = 1, max = 255)
-    @Column(nullable = false, length = 255)
-    private String nome;
+	@Id
+	@NotBlank
+	@Column(length = ID_MAX)
+	private String idDoAluno;
 
-    /** Obrigatória no cadastro manual; pode ficar vazia em alunos importados de arquivos sem essa coluna. */
-    @Size(max = 255)
-    @Column(unique = true, length = 255)
-    private String matricula;
+	@NotNull
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "id_turma", nullable = false)
+	private Turma turma;
 
-    @Email
-    @Size(max = 255)
-    @Column(length = 255)
-    private String email;
+	@NotBlank
+	@Size(max = NOME_MAX)
+	@Column(nullable = false, length = NOME_MAX)
+	private String nome;
 
-    @Size(max = 30)
-    @Column(length = 30)
-    private String telefone;
+	protected Aluno() {
+	}
 
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private SituacaoAluno situacao = SituacaoAluno.ATIVO;
+	public Aluno(String idDoAluno, Turma turma, String nome) {
+		this.idDoAluno = idDoAluno;
+		this.turma = turma;
+		this.nome = nome;
+	}
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "turma_id", nullable = false)
-    private Turma turma;
+	public String getIdDoAluno() {
+		return idDoAluno;
+	}
 
-    @OneToMany(mappedBy = "aluno", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
-    private Set<AlunoResponsavel> responsaveis = new HashSet<>();
+	public Turma getTurma() {
+		return turma;
+	}
 
-    /** Dados do último arquivo importado. */
-    @Min(0)
-    private Integer faltas;
+	public void setTurma(Turma turma) {
+		this.turma = turma;
+	}
 
-    @Min(1)
-    private Integer periodoEmDias;
+	public String getNome() {
+		return nome;
+	}
 
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private Instant criadoEm;
+	public void setNome(String nome) {
+		this.nome = nome;
+	}
 
-    /** Exclusão lógica: quando preenchido, o aluno não aparece mais nas consultas. */
-    private Instant excluidoEm;
-
-    /**
-     * Cria o vínculo com o responsável ou atualiza o parentesco do vínculo existente; sem parentesco informado,
-     * mantém o atual e, em vínculo novo, usa OUTRO.
-     *
-     * @return se um vínculo novo foi criado
-     */
-    public boolean vincular(Responsavel responsavel, Parentesco parentesco) {
-        for (var vinculo : responsaveis) {
-            if (vinculo.getResponsavel().getId().equals(responsavel.getId())) {
-                if (parentesco != null) {
-                    vinculo.setParentesco(parentesco);
-                }
-                return false;
-            }
-        }
-        var vinculo = new AlunoResponsavel(this, responsavel, parentesco != null ? parentesco : Parentesco.OUTRO);
-        return responsaveis.add(vinculo);
-    }
 }

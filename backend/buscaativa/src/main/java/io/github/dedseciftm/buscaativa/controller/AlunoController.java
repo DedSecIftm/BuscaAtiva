@@ -1,68 +1,56 @@
 package io.github.dedseciftm.buscaativa.controller;
 
-import io.github.dedseciftm.buscaativa.dto.AlunoRequest;
+import java.net.URI;
+import java.util.List;
+
 import io.github.dedseciftm.buscaativa.dto.AlunoResponse;
-import io.github.dedseciftm.buscaativa.dto.ImportacaoAlunosRequest;
-import io.github.dedseciftm.buscaativa.dto.ImportacaoAlunosResponse;
+import io.github.dedseciftm.buscaativa.dto.ResponsavelRequest;
+import io.github.dedseciftm.buscaativa.dto.ResponsavelResponse;
 import io.github.dedseciftm.buscaativa.service.AlunoService;
-import io.github.dedseciftm.buscaativa.service.ImportacaoAlunosService;
+import io.github.dedseciftm.buscaativa.service.ResponsavelService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URI;
-import java.util.List;
-import java.util.UUID;
-
+/** Alunos são somente leitura (vêm da importação); os responsáveis de cada aluno são cadastrados aqui. */
 @RestController
 @RequestMapping("/api/alunos")
 public class AlunoController {
 
-    private final AlunoService service;
-    private final ImportacaoAlunosService importacaoService;
+	private final AlunoService alunos;
+	private final ResponsavelService responsaveis;
 
-    public AlunoController(AlunoService service, ImportacaoAlunosService importacaoService) {
-        this.service = service;
-        this.importacaoService = importacaoService;
-    }
+	public AlunoController(AlunoService alunos, ResponsavelService responsaveis) {
+		this.alunos = alunos;
+		this.responsaveis = responsaveis;
+	}
 
-    @GetMapping
-    public List<AlunoResponse> listar() {
-        return service.listar();
-    }
+	@GetMapping
+	public List<AlunoResponse> listar(@RequestParam(required = false) String idTurma) {
+		return alunos.listar(idTurma);
+	}
 
-    @GetMapping("/{id}")
-    public AlunoResponse buscar(@PathVariable UUID id) {
-        return service.buscar(id);
-    }
+	@GetMapping("/{id}")
+	public AlunoResponse buscar(@PathVariable String id) {
+		return alunos.buscar(id);
+	}
 
-    @PostMapping
-    public ResponseEntity<AlunoResponse> criar(@Valid @RequestBody AlunoRequest dados) {
-        var criado = service.criar(dados);
-        return ResponseEntity.created(URI.create("/api/alunos/" + criado.id())).body(criado);
-    }
+	@GetMapping("/{id}/responsaveis")
+	public List<ResponsavelResponse> listarResponsaveis(@PathVariable String id) {
+		return responsaveis.listarDoAluno(id);
+	}
 
-    @PostMapping("/importacao")
-    public ImportacaoAlunosResponse importar(@Valid @RequestBody ImportacaoAlunosRequest dados) {
-        return importacaoService.importar(dados.alunos());
-    }
-
-    @PutMapping("/{id}")
-    public AlunoResponse atualizar(@PathVariable UUID id, @Valid @RequestBody AlunoRequest dados) {
-        return service.atualizar(id, dados);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable UUID id) {
-        service.excluir(id);
-        return ResponseEntity.noContent().build();
-    }
+	@PostMapping("/{id}/responsaveis")
+	public ResponseEntity<ResponsavelResponse> cadastrarResponsavel(@PathVariable String id,
+			@Valid @RequestBody ResponsavelRequest dados) {
+		var criado = responsaveis.criar(id, dados);
+		return ResponseEntity.created(URI.create("/api/responsaveis/" + criado.id())).body(criado);
+	}
 
 }
