@@ -1,0 +1,11 @@
+{
+  "alunos": [
+    { "Nome": "Lia Rocha", "Matrícula": "20269001", "Turma": "Teste 2º Ano A", "Telefone": "(61) 90000-9001", "Faltas": 2, "Período em dias": 30, "Responsável": "Rita Rocha", "Telefone do Responsável": "(61) 91111-0001", "E-mail do Responsável": "rita.rocha@exemplo.com", "Parentesco": "Mãe" },
+    { "Nome": "Lia Rocha", "Matrícula": "20269001", "Turma": "Teste 2º Ano A", "Telefone": "(61) 90000-9001", "Faltas": 2, "Período em dias": 30, "Responsável": "Caio Rocha", "Telefone do Responsável": "(61) 91111-0002", "E-mail do Responsável": "caio.rocha@exemplo.com", "Parentesco": "Pai" },
+    { "Nome": "Leo Rocha", "Matrícula": "20269002", "Turma": "Teste 3º Ano B", "Telefone": "(61) 90000-9002", "Faltas": 5, "Período em dias": 30, "Responsável": "Rita Rocha", "Telefone do Responsável": "61911110001", "E-mail do Responsável": "RITA.ROCHA@exemplo.com", "Parentesco": "Mãe" },
+    { "Nome": "Theo Lima", "Matrícula": "20269003", "Turma": "Teste 2º Ano A", "Telefone": "(61) 90000-9003", "Faltas": 0, "Período em dias": 30, "Responsável": "Vera Lima", "Telefone do Responsável": "(61) 91111-0003", "E-mail do Responsável": "", "Parentesco": "Avó" },
+    { "Nome": "Bia Lima", "Matrícula": "20269004", "Turma": "Teste 3º Ano B", "Telefone": "(61) 90000-9004", "Faltas": 1, "Período em dias": 30, "Responsável": "Vera Lima", "Telefone do Responsável": "61 91111-0003", "E-mail do Responsável": "", "Parentesco": "Avó" },
+    { "Nome": "Noah Dias", "Matrícula": "20269005", "Turma": "Teste 2º Ano A", "Telefone": "(61) 90000-9005", "Faltas": 3, "Período em dias": 60, "Responsável": "", "Telefone do Responsável": "", "E-mail do Responsável": "", "Parentesco": "" },
+    { "Nome": "Ivo Dias", "Matrícula": "20269006", "Turma": "Teste 2º Ano A", "Telefone": "(61) 90000-9006", "Faltas": 4, "Período em dias": 60, "Responsável": "Sem Contato", "Telefone do Responsável": "", "E-mail do Responsável": "", "Parentesco": "Tio" }
+  ]
+}

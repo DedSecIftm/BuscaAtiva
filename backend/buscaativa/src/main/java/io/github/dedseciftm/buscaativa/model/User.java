@@ -24,6 +24,9 @@ public class User {
 
     private String password;
 
+    @Column(length = 100, nullable = false)
+    private String nome;
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinTable(name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),

@@ -1,0 +1,92 @@
+{
+  "alunos": [
+    {
+      "nome": "Bruno Teixeira",
+      "matricula": "20260201",
+      "turma": "Teste 1º Ano C",
+      "faltas": 16,
+      "periodoEmDias": 60
+    },
+    {
+      "nome": "Carla Guimarães",
+      "matricula": "20260202",
+      "turma": "Teste 1º Ano C",
+      "faltas": 19,
+      "periodoEmDias": 30
+    },
+    {
+      "nome": "Daniel Rezende",
+      "matricula": "20260203",
+      "turma": "Teste 1º Ano C",
+      "faltas": 6,
+      "periodoEmDias": 60
+    },
+    {
+      "nome": "Elisa Esteves",
+      "matricula": "20260204",
+      "turma": "Teste 1º Ano C",
+      "faltas": 9,
+      "periodoEmDias": 30
+    },
+    {
+      "nome": "Felipe Pacheco",
+      "matricula": "20260205",
+      "turma": "Teste 1º Ano C",
+      "faltas": 12,
+      "periodoEmDias": 60
+    },
+    {
+      "nome": "Gabriela Campos",
+      "matricula": "20260206",
+      "turma": "Teste 1º Ano C",
+      "faltas": 15,
+      "periodoEmDias": 30
+    },
+    {
+      "nome": "Henrique Macedo",
+      "matricula": "20260207",
+      "turma": "Teste 1º Ano C",
+      "faltas": 18,
+      "periodoEmDias": 60
+    },
+    {
+      "nome": "Isabela Almeida",
+      "matricula": "20260208",
+      "turma": "Teste 1º Ano C",
+      "faltas": 5,
+      "periodoEmDias": 30
+    },
+    {
+      "nome": "João Henriques",
+      "matricula": "20260209",
+      "turma": "Teste 1º Ano C",
+      "faltas": 8,
+      "periodoEmDias": 60
+    },
+    {
+      "nome": "Karina Sampaio",
+      "matricula": "20260210",
+      "turma": "Teste 1º Ano C",
+      "faltas": 11,
+      "periodoEmDias": 30
+    },
+    {
+      "nome": "Lucas Fontes",
+      "matricula": "20260211",
+      "email": "lucasfontes211@exemplo.com",
+      "telefone": "(61) 90000-0211",
+      "turma": "Teste 1º Ano C",
+      "faltas": 9,
+      "periodoEmDias": 60
+    },
+    {
+      "nome": "Marina Queiroz",
+      "matricula": "20260212",
+      "email": "marinaqueiroz212@exemplo.com",
+      "telefone": "(61) 90000-0212",
+      "turma": "Teste 1º Ano C",
+      "faltas": 12,
+      "periodoEmDias": 30
+    }
+  ]
+}

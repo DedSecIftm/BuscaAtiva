@@ -52,6 +52,7 @@ public class InicializadorDeDados implements ApplicationRunner {
 
         if (!adminEmail.isBlank() && !adminSenha.isBlank() && !userRepository.existsByEmail(adminEmail)) {
             userRepository.save(User.builder()
+                    .nome("Administrador")
                     .email(adminEmail)
                     .password(passwordEncoder.encode(adminSenha))
                     .roles(List.of(papelAdmin))

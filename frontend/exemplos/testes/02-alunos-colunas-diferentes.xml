@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<alunos>
+  <aluno matricula="20260101"><nomeCompleto>Bruno Dias</nomeCompleto><email>brunodias101@exemplo.com</email><celular>(61) 90000-0101</celular><classe>Teste 1º Ano B</classe><faltas>15</faltas><periodo>60</periodo></aluno>
+  <aluno matricula="20260102"><nomeCompleto>Carla Nogueira</nomeCompleto><email>carlanogueira102@exemplo.com</email><celular>(61) 90000-0102</celular><classe>Teste 1º Ano B</classe><faltas>2</faltas><periodo>30</periodo></aluno>
+  <aluno matricula="20260103"><nomeCompleto>Daniel Barros</nomeCompleto><email>danielbarros103@exemplo.com</email><celular>(61) 90000-0103</celular><classe>Teste 1º Ano B</classe><faltas>5</faltas><periodo>60</periodo></aluno>
+  <aluno matricula="20260104"><nomeCompleto>Elisa Lacerda</nomeCompleto><email>elisalacerda104@exemplo.com</email><celular>(61) 90000-0104</celular><classe>Teste 1º Ano B</classe><faltas>8</faltas><periodo>30</periodo></aluno>
+  <aluno matricula="20260105"><nomeCompleto>Felipe Teixeira</nomeCompleto><email>felipeteixeira105@exemplo.com</email><celular>(61) 90000-0105</celular><classe>Teste 1º Ano B</classe><faltas>11</faltas><periodo>60</periodo></aluno>
+  <aluno matricula="20260106"><nomeCompleto>Gabriela Guimarães</nomeCompleto><email>gabrielaguimaraes106@exemplo.com</email><celular>(61) 90000-0106</celular><classe>Teste 1º Ano B</classe><faltas>14</faltas><periodo>30</periodo></aluno>
+  <aluno matricula="20260107"><nomeCompleto>Henrique Rezende</nomeCompleto><email>henriquerezende107@exemplo.com</email><celular>(61) 90000-0107</celular><classe>Teste 1º Ano B</classe><faltas>1</faltas><periodo>60</periodo></aluno>
+  <aluno matricula="20260108"><nomeCompleto>Isabela Esteves</nomeCompleto><email>isabelaesteves108@exemplo.com</email><celular>(61) 90000-0108</celular><classe>Teste 1º Ano B</classe><faltas>4</faltas><periodo>30</periodo></aluno>
+  <aluno matricula="20260109"><nomeCompleto>João Pacheco</nomeCompleto><email>joaopacheco109@exemplo.com</email><celular>(61) 90000-0109</celular><classe>Teste 1º Ano B</classe><faltas>7</faltas><periodo>60</periodo></aluno>
+  <aluno matricula="20260110"><nomeCompleto>Karina Campos</nomeCompleto><email>karinacampos110@exemplo.com</email><celular>(61) 90000-0110</celular><classe>Teste 1º Ano B</classe><faltas>10</faltas><periodo>30</periodo></aluno>
+</alunos>
