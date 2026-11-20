@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 export type UserToken = {
     token:string
@@ -20,8 +20,15 @@ export default function useToken() {
         setToken(userToken.token);
     }
 
+    // Estável entre renderizações: é dependência do efeito que busca o usuário atual.
+    const removeToken = useCallback(() => {
+        localStorage.removeItem('token');
+        setToken(null);
+    }, []);
+
     return {
         token,
-        setToken: saveToken
+        setToken: saveToken,
+        removeToken
     }
 }

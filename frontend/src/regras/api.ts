@@ -3,14 +3,16 @@ import { getToken } from './useToken.ts'
 
 const URL_BASE = '/api/regras'
 
-export type ErrosDosCampos = Partial<Record<keyof DadosRegra, string>>
+export type ErrosDosCampos<T = DadosRegra> = Partial<Record<keyof T, string>>
 
-export class ErroApi extends Error {
-  readonly erros: ErrosDosCampos
+export class ErroApi<T = DadosRegra> extends Error {
+  readonly erros: ErrosDosCampos<T>
+  readonly status?: number
 
-  constructor(message: string, erros: ErrosDosCampos = {}) {
+  constructor(message: string, erros: ErrosDosCampos<T> = {}, status?: number) {
     super(message)
     this.erros = erros
+    this.status = status
   }
 }
 
@@ -39,7 +41,7 @@ async function requisitar<T>(caminho: string, opcoes: RequestInit = {}): Promise
     Object.entries((corpo.erros ?? {}) as Record<string, string>).forEach(([campo, mensagem]) => {
       erros[CAMPOS_DO_SERVIDOR[campo] ?? (campo as keyof DadosRegra)] = mensagem
     })
-    throw new ErroApi(corpo.detail ?? 'Ocorreu um erro no servidor. Tente novamente.', erros)
+    throw new ErroApi(corpo.detail ?? 'Ocorreu um erro no servidor. Tente novamente.', erros, resposta.status)
   }
   return resposta.status === 204 ? (undefined as T) : resposta.json()
 }
