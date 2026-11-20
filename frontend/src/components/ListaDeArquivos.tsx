@@ -12,8 +12,6 @@ import Paper from '@mui/material/Paper'
 import Stack from '@mui/material/Stack'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
-import CodeIcon from '@mui/icons-material/Code'
-import DataObjectIcon from '@mui/icons-material/DataObject'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import ErrorOutlinedIcon from '@mui/icons-material/ErrorOutlined'
 import TableChartIcon from '@mui/icons-material/TableChart'
@@ -22,8 +20,6 @@ import type { TipoArquivo } from '../importacao/lerArquivo.ts'
 
 const ICONES: Record<TipoArquivo, ReactNode> = {
   Excel: <TableChartIcon color="success" />,
-  XML: <CodeIcon color="warning" />,
-  JSON: <DataObjectIcon color="info" />,
 }
 
 function formatarTamanho(bytes: number): string {

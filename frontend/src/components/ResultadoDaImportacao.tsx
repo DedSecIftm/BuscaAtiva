@@ -7,18 +7,17 @@ const MAXIMO_DE_ERROS = 10
 
 export type ResultadoDoArquivo = { nome: string } & ({ resultado: Resultado } | { falha: string })
 
-function resumo({ criados, atualizados, responsaveisCriados, responsaveisVinculados, erros }: Resultado): string {
+function resumo({ turmasCriadas, alunosCriados, alunosAtualizados, linhasComErro }: Resultado): string {
   const partes = [
-    `${criados} ${criados === 1 ? 'aluno cadastrado' : 'alunos cadastrados'}`,
-    `${atualizados} ${atualizados === 1 ? 'atualizado' : 'atualizados'}`,
+    `${alunosCriados} ${alunosCriados === 1 ? 'aluno cadastrado' : 'alunos cadastrados'}`,
+    `${alunosAtualizados} ${alunosAtualizados === 1 ? 'atualizado' : 'atualizados'}`,
   ]
-  if (responsaveisCriados > 0) {
-    partes.push(`${responsaveisCriados} ${responsaveisCriados === 1 ? 'responsável cadastrado' : 'responsáveis cadastrados'}`)
+  if (turmasCriadas > 0) {
+    partes.push(`${turmasCriadas} ${turmasCriadas === 1 ? 'turma cadastrada' : 'turmas cadastradas'}`)
   }
-  if (responsaveisVinculados > 0) {
-    partes.push(`${responsaveisVinculados} ${responsaveisVinculados === 1 ? 'vínculo criado' : 'vínculos criados'}`)
+  if (linhasComErro > 0) {
+    partes.push(`${linhasComErro} ${linhasComErro === 1 ? 'linha com erro' : 'linhas com erro'}`)
   }
-  if (erros.length > 0) partes.push(`${erros.length} com erro`)
   return partes.join(' · ')
 }
 
@@ -40,10 +39,8 @@ function ResultadoDaImportacao({ item, onFechar }: { item: ResultadoDoArquivo; o
       {resumo(item.resultado)}
       {erros.length > 0 && (
         <Box component="ul" sx={{ m: 0, mt: 1, pl: 2.5 }}>
-          {erros.slice(0, MAXIMO_DE_ERROS).map(({ linha, mensagem }) => (
-            <li key={linha}>
-              Registro {linha}: {mensagem}
-            </li>
+          {erros.slice(0, MAXIMO_DE_ERROS).map((mensagem) => (
+            <li key={mensagem}>{mensagem}</li>
           ))}
           {ocultos > 0 && <li>E mais {ocultos}.</li>}
         </Box>
