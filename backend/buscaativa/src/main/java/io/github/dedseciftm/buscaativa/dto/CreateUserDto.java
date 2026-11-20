@@ -8,6 +8,10 @@ import jakarta.validation.constraints.Size;
 
 public record CreateUserDto(
 
+        @NotBlank(message = "Informe o nome.")
+        @Size(max = 100, message = "O nome pode ter no máximo 100 caracteres.")
+        String nome,
+
         @NotBlank(message = "Informe o e-mail.")
         @Email(message = "Informe um e-mail válido.")
         String email,

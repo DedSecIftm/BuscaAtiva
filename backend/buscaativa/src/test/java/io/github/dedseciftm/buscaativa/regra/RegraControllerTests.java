@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.security.test.context.support.WithMockUser;
 
-/** Usa o banco do docker-compose; cada teste é desfeito ao final. */
+/** Usa o PostgreSQL temporário dos testes; cada teste é desfeito ao final. */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")

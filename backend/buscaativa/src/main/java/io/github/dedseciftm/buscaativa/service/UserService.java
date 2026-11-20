@@ -69,6 +69,7 @@ public class UserService {
                 .orElseGet(() -> roleRepository.save(Role.builder().name(createUserDto.role()).build()));
 
         User newUser = User.builder()
+                .nome(createUserDto.nome().trim())
                 .email(email)
                 // Codifica a senha do usuário com o algoritmo bcrypt
                 .password(passwordEncoder.encode(createUserDto.password()))

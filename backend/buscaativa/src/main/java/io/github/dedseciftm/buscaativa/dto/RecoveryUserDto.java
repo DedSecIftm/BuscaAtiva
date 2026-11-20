@@ -8,13 +8,14 @@ import java.util.List;
 public record RecoveryUserDto(
 
         Long id,
+        String nome,
         String email,
         List<RoleName> roles
 
 ) {
 
     public static RecoveryUserDto de(User user) {
-        return new RecoveryUserDto(user.getId(), user.getEmail(),
+        return new RecoveryUserDto(user.getId(), user.getNome(), user.getEmail(),
                 user.getRoles().stream().map(role -> role.getName()).toList());
     }
 }

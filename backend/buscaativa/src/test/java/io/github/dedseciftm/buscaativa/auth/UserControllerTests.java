@@ -1,5 +1,6 @@
 package io.github.dedseciftm.buscaativa.auth;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -56,7 +57,7 @@ class UserControllerTests {
         Role papel = roleRepository.findByName(nome)
                 .orElseGet(() -> roleRepository.save(Role.builder().name(nome).build()));
         userRepository.findByEmail(email).ifPresent(userRepository::delete);
-        userRepository.saveAndFlush(User.builder().email(email).password(passwordEncoder.encode(SENHA))
+        userRepository.saveAndFlush(User.builder().nome("Pessoa de Teste").email(email).password(passwordEncoder.encode(SENHA))
                 .roles(List.of(papel)).build());
     }
 
@@ -85,6 +86,7 @@ class UserControllerTests {
     void meDevolveOsDadosDoUsuarioDoToken() throws Exception {
         mvc.perform(get("/api/users/me").header(HttpHeaders.AUTHORIZATION, bearer(EMAIL_USER)))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nome").value("Pessoa de Teste"))
                 .andExpect(jsonPath("$.email").value(EMAIL_USER))
                 .andExpect(jsonPath("$.roles[0]").value("ROLE_USER"));
     }
@@ -161,14 +163,14 @@ class UserControllerTests {
     void usuarioComumNaoPodeCriarUsuario() throws Exception {
         mvc.perform(post("/api/users").header(HttpHeaders.AUTHORIZATION, bearer(EMAIL_USER))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{ \"email\": \"novo@escola.com\", \"password\": \"outra-senha-123\", \"role\": \"ROLE_USER\" }"))
+                        .content("{ \"nome\": \"Pessoa Nova\", \"email\": \"novo@escola.com\", \"password\": \"outra-senha-123\", \"role\": \"ROLE_USER\" }"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void criarUsuarioSemTokenRetorna401() throws Exception {
         mvc.perform(post("/api/users").contentType(MediaType.APPLICATION_JSON)
-                        .content("{ \"email\": \"novo@escola.com\", \"password\": \"outra-senha-123\", \"role\": \"ROLE_ADMIN\" }"))
+                        .content("{ \"nome\": \"Pessoa Nova\", \"email\": \"novo@escola.com\", \"password\": \"outra-senha-123\", \"role\": \"ROLE_ADMIN\" }"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -176,7 +178,7 @@ class UserControllerTests {
     @WithMockUser(roles = "ADMIN")
     void adminCriaUsuarioEOutroLoginFunciona() throws Exception {
         mvc.perform(post("/api/users").contentType(MediaType.APPLICATION_JSON)
-                        .content("{ \"email\": \"Novo@Escola.com\", \"password\": \"outra-senha-123\", \"role\": \"ROLE_USER\" }"))
+                        .content("{ \"nome\": \"Pessoa Nova\", \"email\": \"Novo@Escola.com\", \"password\": \"outra-senha-123\", \"role\": \"ROLE_USER\" }"))
                 .andExpect(status().isCreated());
 
         login("novo@escola.com", "outra-senha-123");
@@ -184,9 +186,28 @@ class UserControllerTests {
 
     @Test
     @WithMockUser(roles = "ADMIN")
+    void criarUsuarioGuardaONomeSemEspacosNasPontas() throws Exception {
+        mvc.perform(post("/api/users").contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"nome\": \"  Pessoa Nova  \", \"email\": \"novo@escola.com\", \"password\": \"outra-senha-123\", \"role\": \"ROLE_USER\" }"))
+                .andExpect(status().isCreated());
+
+        assertEquals("Pessoa Nova", userRepository.findByEmail("novo@escola.com").orElseThrow().getNome());
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    void criarUsuarioSemNomeRetorna400() throws Exception {
+        mvc.perform(post("/api/users").contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"email\": \"novo@escola.com\", \"password\": \"outra-senha-123\", \"role\": \"ROLE_USER\" }"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.erros.nome").value("Informe o nome."));
+    }
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
     void criarEmailRepetidoRetorna409() throws Exception {
         mvc.perform(post("/api/users").contentType(MediaType.APPLICATION_JSON)
-                        .content("{ \"email\": \"" + EMAIL_USER + "\", \"password\": \"outra-senha-123\", \"role\": \"ROLE_USER\" }"))
+                        .content("{ \"nome\": \"Pessoa Nova\", \"email\": \"" + EMAIL_USER + "\", \"password\": \"outra-senha-123\", \"role\": \"ROLE_USER\" }"))
                 .andExpect(status().isConflict());
     }
 
@@ -194,7 +215,7 @@ class UserControllerTests {
     @WithMockUser(roles = "ADMIN")
     void senhaCurtaRetorna400() throws Exception {
         mvc.perform(post("/api/users").contentType(MediaType.APPLICATION_JSON)
-                        .content("{ \"email\": \"novo@escola.com\", \"password\": \"123\", \"role\": \"ROLE_USER\" }"))
+                        .content("{ \"nome\": \"Pessoa Nova\", \"email\": \"novo@escola.com\", \"password\": \"123\", \"role\": \"ROLE_USER\" }"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.erros.password").isNotEmpty());
     }
